@@ -7,15 +7,15 @@
   IgnorableNamespaces="uap mp">
 
   <Identity
-    Name="3832f514-53f6-4659-8e81-57aaf638035e"
-    Publisher="CN=Curtis"
+    Name="d6e182cf-a168-4310-8813-019cbe09ccd9"
+    Publisher="CN=curti"
     Version="1.0.0.0" />
 
-  <mp:PhoneIdentity PhoneProductId="3832f514-53f6-4659-8e81-57aaf638035e" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="d6e182cf-a168-4310-8813-019cbe09ccd9" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>Capstone</DisplayName>
-    <PublisherDisplayName>Curtis</PublisherDisplayName>
+    <PublisherDisplayName>curti</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
