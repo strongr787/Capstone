@@ -122,6 +122,15 @@
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Models\Alarm.cs" />
+    <Compile Include="Models\MapProvider.cs" />
+    <Compile Include="Models\Reminder.cs" />
+    <Compile Include="Models\SearchableWebsite.cs" />
+    <Compile Include="Models\SearchEngine.cs" />
+    <Compile Include="Models\Setting.cs" />
+    <Compile Include="Models\VoiceMemo.cs" />
+    <Compile Include="Models\WeatherInfo.cs" />
+    <Compile Include="Models\WeatherProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
