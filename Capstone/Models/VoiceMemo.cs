@@ -2,7 +2,7 @@
 
 namespace Capstone.Models
 {
-    class VoiceMemo
+    public class VoiceMemo
     {
         public int VoiceMemoID { get; set; }
         /// <summary>

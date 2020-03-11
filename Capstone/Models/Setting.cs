@@ -9,7 +9,7 @@ namespace Capstone.Models
     /// <summary>
     /// A Setting is an object representing a configurable option for the application
     /// </summary>
-    class Setting
+    public class Setting
     {
         public int SettingID { get; set; }
         public string DisplayName { get; set; }
@@ -29,7 +29,7 @@ namespace Capstone.Models
         }
     }
 
-    class SettingOption
+    public class SettingOption
     {
         public int OptionID { get; set; }
         public string DisplayName { get; set; }

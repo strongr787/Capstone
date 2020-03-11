@@ -2,7 +2,7 @@
 
 namespace Capstone.Models
 {
-    class Alarm
+    public class Alarm
     {
         public int AlarmID { get; set; }
         public string Title { get; set; }
