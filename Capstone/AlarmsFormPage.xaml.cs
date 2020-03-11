@@ -33,7 +33,7 @@ namespace Capstone
             this.AlarmTimePicker.Time = this.AlarmToEdit.ActivateDateAndTime.TimeOfDay;
 
             // set the minimum date on our date picker field (minimum time can't be set on a timepicker field)
-            this.AlarmDatePicker.MinDate = this.AlarmToEdit.ActivateDateAndTime.Date;
+            this.AlarmDatePicker.MinDate = System.DateTime.Now.Date;
         }
 
         private void PopulateAlarmFromForm()
