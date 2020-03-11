@@ -1,0 +1,35 @@
+﻿using System;
+
+namespace Capstone.Models
+{
+    class Reminder
+    {
+
+        public int ReminderID { get; set; }
+        public string Title { get; set; }
+        public DateTime ActivateDateAndTime { get; set; }
+        public string Description { get; set; }
+        public bool IsDeleted { get; set; }
+
+        public Reminder() : this(-1, "", DateTime.MaxValue, "", false)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new reminder, with the title, date, and deleted status
+        /// </summary>
+        /// <param name="ReminderID">The ID in the database for the reminder</param>
+        /// <param name="Title">The title of the reminder that shows up on the UI</param>
+        /// <param name="ActivateDateAndTime">The date and time that the reminder is set to go off</param>
+        /// <param name="Description">The description of the reminder to show on the UI</param>
+        /// <param name="IsDeleted">whether or not the reminder is set to be deleted. If marked as true, it will not go off and will not appear on the UI</param>
+        public Reminder(int ReminderID, string Title, DateTime ActivateDateAndTime, string Description, bool IsDeleted)
+        {
+            this.ReminderID = ReminderID;
+            this.Title = Title;
+            this.ActivateDateAndTime = ActivateDateAndTime;
+            this.Description = Description;
+            this.IsDeleted = IsDeleted;
+        }
+    }
+}
