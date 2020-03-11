@@ -25,7 +25,7 @@
         <CalendarDatePicker x:Name="AlarmDatePicker" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="1" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="20,20,20,0" Header="Date"/>
         <TimePicker x:Name="AlarmTimePicker" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="20,20,20,0" Header="Time" />
         <!--buttons for submit and cancel-->
-        <Button x:Name="CancelAlarmButton" Content="Cancel" Grid.Row="3" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="20" Height="62"/>
+        <Button x:Name="CancelAlarmButton" Content="Cancel" Grid.Row="3" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="20" Height="62" Click="CancelAlarmButton_Click"/>
         <Button x:Name="SubmitAlarmButton" Content="Save" Grid.Row="3" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="20" Height="62" Click="SubmitAlarmButton_Click"/>
     </Grid>
 </Page>

@@ -78,5 +78,11 @@ namespace Capstone
             var timeMinutes = this.AlarmTimePicker.Time.Minutes;
             return timeHours > now.Hour || (timeHours >= now.Hour && timeMinutes >= now.Minute);
         }
+
+        private void CancelAlarmButton_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            // TODO maybe we should add a confirmation box? or maybe we shouldn't because of how simple it is to create an alarm
+            this.Frame.Navigate(typeof(AlarmsPage));
+        }
     }
 }
