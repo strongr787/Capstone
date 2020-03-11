@@ -76,7 +76,7 @@ namespace Capstone
             var now = System.DateTime.Now;
             var timeHours = this.AlarmTimePicker.Time.Hours;
             var timeMinutes = this.AlarmTimePicker.Time.Minutes;
-            return now.Hour <= timeHours && now.Minute <= timeMinutes;
+            return timeHours > now.Hour || (timeHours >= now.Hour && timeMinutes >= now.Minute);
         }
     }
 }
