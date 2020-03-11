@@ -55,7 +55,7 @@ namespace Capstone
 
         private void AlarmsButton_Click(object sender, RoutedEventArgs e)
         {
-            // TODO navigate to settings screen (this.Frame.Navigate(typeof(screenName)))
+            this.Frame.Navigate(typeof(AlarmsPage));
         }
 
         private void VoiceNotesButton_Click(object sender, RoutedEventArgs e)
