@@ -35,7 +35,7 @@ namespace Capstone
 
         private List<Alarm> GetAlarmsFromDatabase()
         {
-            List<Alarm> alarms = new List<Alarm> { new Alarm(-1, "Test Title", System.DateTime.Now, false), new Alarm(-1, "Test Title", System.DateTime.Now, false), new Alarm(-1, "Test Title", System.DateTime.Now, false) };
+            List<Alarm> alarms = new List<Alarm>();
             // TODO database stuff
             return alarms;
         }
