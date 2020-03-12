@@ -10,7 +10,7 @@ namespace Capstone
     /// </summary>
     public sealed partial class AlarmsFormPage : Page
     {
-        private Alarm AlarmToEdit;
+        public Alarm AlarmToEdit { get; set; }
         public AlarmsFormPage()
         {
             this.InitializeComponent();
@@ -24,7 +24,7 @@ namespace Capstone
             this.PopulateFormFromAlarm();
         }
 
-        private void PopulateFormFromAlarm()
+        public void PopulateFormFromAlarm()
         {
             // set the title field
             this.AlarmTitleInput.Text = this.AlarmToEdit.Title;
@@ -54,7 +54,7 @@ namespace Capstone
             }
         }
 
-        private bool ValidateForm()
+        public bool ValidateForm()
         {
             // make sure that the title is not empty or blank
             bool isValid = true;
@@ -70,7 +70,7 @@ namespace Capstone
             return isValid;
         }
 
-        private bool ValidateTime()
+        public bool ValidateTime()
         {
             // get the hours and minutes of our time and compare them against date.now
             var now = System.DateTime.Now;
