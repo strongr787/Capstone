@@ -2,7 +2,7 @@
 
 namespace Capstone.Models
 {
-    class MapProvider
+    public class MapProvider
     {
         public int MapProviderID { get; set; }
         public string Name { get; set; }

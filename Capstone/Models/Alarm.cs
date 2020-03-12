@@ -2,14 +2,14 @@
 
 namespace Capstone.Models
 {
-    class Alarm
+    public class Alarm
     {
         public int AlarmID { get; set; }
         public string Title { get; set; }
         public DateTime ActivateDateAndTime { get; set; }
         public bool IsDeleted { get; set; }
 
-        public Alarm() : this(-1, "", DateTime.MaxValue, false)
+        public Alarm() : this(-1, "", DateTime.Now, false)
         {
         }
 

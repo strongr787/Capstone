@@ -2,7 +2,7 @@
 
 namespace Capstone.Models
 {
-    class Reminder
+    public class Reminder
     {
 
         public int ReminderID { get; set; }

@@ -3,7 +3,7 @@
     /// <summary>
     /// Contains info for a single bit of weather, including temperature, humidity, wind, and precipitation
     /// </summary>
-    class WeatherInfo
+    public class WeatherInfo
     {
         public float CurrentTemperature { get; set; }
         public float High { get; set; }

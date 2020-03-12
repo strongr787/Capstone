@@ -2,7 +2,7 @@
 
 namespace Capstone.Models
 {
-    class WeatherProvider
+    public class WeatherProvider
     {
         public int WeatherProviderID { get; set; }
         public string Name { get; set; }

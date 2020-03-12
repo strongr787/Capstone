@@ -1,6 +1,6 @@
 ﻿namespace Capstone.Models
 {
-    class SearchEngine
+    public class SearchEngine
     {
         public int SearchEngineID { get; set; }
         public string Name { get; set; }
