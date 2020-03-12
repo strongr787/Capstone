@@ -35,7 +35,7 @@ namespace Capstone
 
         private List<Reminder> GetRemindersFromDatabase()
         {
-            List<Reminder> Reminders = new List<Reminder> { new Reminder(), new Reminder(), new Reminder(), new Reminder(-1, "Reminder Title", System.DateTime.Now, "This is the reminder description. It's really cool and I like how the cards are", false) };
+            List<Reminder> Reminders = new List<Reminder>();
             // TODO database stuff
             return Reminders;
         }
