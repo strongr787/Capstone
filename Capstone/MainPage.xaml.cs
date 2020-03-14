@@ -60,7 +60,7 @@ namespace Capstone
 
         private void VoiceNotesButton_Click(object sender, RoutedEventArgs e)
         {
-            // TODO navigate to settings screen (this.Frame.Navigate(typeof(screenName)))
+            this.Frame.Navigate(typeof(VoiceMemosPage));
         }
 
         private void DataPrivacyButton_Click(object sender, RoutedEventArgs e)
