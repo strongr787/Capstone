@@ -11,7 +11,7 @@ namespace Capstone.Models
         public string Description { get; set; }
         public bool IsDeleted { get; set; }
 
-        public Reminder() : this(-1, "", DateTime.MaxValue, "", false)
+        public Reminder() : this(-1, "", DateTime.Now, "", false)
         {
         }
 
