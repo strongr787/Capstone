@@ -146,6 +146,9 @@
     <Compile Include="RemindersPage.xaml.cs">
       <DependentUpon>RemindersPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="VoiceMemosPage.xaml.cs">
+      <DependentUpon>VoiceMemosPage.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
@@ -187,6 +190,10 @@
     <Page Include="RemindersPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="VoiceMemosPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
