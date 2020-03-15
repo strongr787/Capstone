@@ -1,28 +1,25 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Capstone.Actions
 {
     public class AlarmAction : Action
     {
-        private string Title { get; set; }
-        private DateTime ActivateDateAndTime { get; set; }
-        private AlarmActionTypes ActionType { get; set; }
-        private string CommandString { get; set; }
+        public string Title { get; set; }
+        public DateTime ActivateDateAndTime { get; set; }
+        public AlarmActionTypes ActionType { get; set; }
 
-        public AlarmAction(string Title, DateTime ActivateDateTime, AlarmActionTypes ActionType)
+        public AlarmAction(string Title, DateTime ActivateDateTime, AlarmActionTypes ActionType, string CommandString)
         {
             this.Title = Title;
             this.ActivateDateAndTime = ActivateDateTime;
             this.ActionType = ActionType;
+            this.CommandString = CommandString;
         }
 
         public AlarmAction(AlarmActionTypes ActionType, string CommandString)
         {
             this.ActionType = ActionType;
+            this.CommandString = CommandString;
         }
 
         private string RequestTitle()
@@ -43,6 +40,7 @@ namespace Capstone.Actions
 
         public override void PerformAction()
         {
+            // TODO
         }
 
         public enum AlarmActionTypes

@@ -2,9 +2,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace UnitTests
 {
@@ -25,7 +22,7 @@ namespace UnitTests
             inputDict.Add("alarms", "whatever");
             inputDict.Add("reminders", "whatever");
             string matchingKeyword = ActionRouter.FindKeyword(inputString, inputDict);
-            Assert.AreEqual(keyword, matchingKeyword);
+            Assert.AreEqual(keyword, matchingKeyword.ToLower());
         }
 
         [TestMethod]
@@ -43,6 +40,36 @@ namespace UnitTests
             inputDict.Add("reminders", "whatever");
             string matchingKeyword = ActionRouter.FindKeyword(inputString, inputDict);
             Assert.IsNull(matchingKeyword);
+        }
+
+        [TestMethod]
+        public void TestGetNextNodeInChainReturnsValueAttachedToFoundKeyword()
+        {
+            const string keyword = "piano";
+            string inputString = $"this is the input string, and the keyword is {keyword}";
+            // create the dictionary of the values, mimicking the case insensitivity the original dictionary has
+            Dictionary<string, dynamic> inputDict = new Dictionary<string, dynamic>();
+            inputDict.Add("notIt", "whatever");
+            inputDict.Add("weather", "whatever");
+            inputDict.Add("Piano", "correct value");
+            inputDict.Add("alarms", "whatever");
+            inputDict.Add("reminders", "whatever");
+            var value = ActionRouter.GetNextNodeInChain(inputString, inputDict);
+            Assert.AreEqual(value, "correct value");
+        }
+
+        [TestMethod]
+        public void TestGetFunctionFromCommandStringReturnsExpectedFunction()
+        {
+            // setup the action router
+            ActionRouter.SetUp();
+            // the command string
+            const string commandString = "Set an alarm for 5:30 A.M.";
+            Func<string, Capstone.Actions.Action> returnedFunction = ActionRouter.GetFunctionFromCommandString(commandString);
+            Assert.IsNotNull(returnedFunction);
+            Capstone.Actions.AlarmAction returnedAction = (AlarmAction)returnedFunction(commandString);
+            // check the alarm action's values
+            Assert.AreEqual(AlarmAction.AlarmActionTypes.CREATE, returnedAction.ActionType);
         }
     }
 }
