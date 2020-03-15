@@ -67,9 +67,17 @@ namespace UnitTests
             const string commandString = "Set an alarm for 5:30 A.M.";
             Func<string, Capstone.Actions.Action> returnedFunction = ActionRouter.GetFunctionFromCommandString(commandString);
             Assert.IsNotNull(returnedFunction);
-            Capstone.Actions.AlarmAction returnedAction = (AlarmAction)returnedFunction(commandString);
+            AlarmAction returnedAction = (AlarmAction)returnedFunction(commandString);
             // check the alarm action's values
             Assert.AreEqual(AlarmAction.AlarmActionTypes.CREATE, returnedAction.ActionType);
+        }
+
+        [TestMethod]
+        public void TestGetFunctionFromCommandStringReturnsNullIfNoDesiredActionCanBeDetermined()
+        {
+            ActionRouter.SetUp();
+            const string commandString = "Made you look!";
+            Assert.IsNull(ActionRouter.GetFunctionFromCommandString(commandString));
         }
     }
 }

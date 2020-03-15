@@ -1,25 +1,95 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Capstone.Actions
 {
     public static class ActionRouter
     {
         // a case-insensitive dictionary. Due to runtime binding the second argument needs to be set to "dynamic". In practice, this value is  Dictionary<string, dynamic>. The dynamic keeps going until a value of type Func<string, Action> is reached
-        private static readonly Dictionary<string, dynamic> actionTree = new Dictionary<string, dynamic>();
+        private static Dictionary<string, dynamic> actionTree;
 
         public static void SetUp()
         {
+            // initialize the action tree
+            actionTree = new Dictionary<string, dynamic>();
             // add all the main keys to the dictionary
             SetUpAlarmBranches();
+            SetUpReminderBranches();
+            SetUpTimeBranches();
+            SetUpInternetSearchBranches();
+            SetUpWeatherBranches();
+            SetUpVoiceNoteBranches();
         }
 
         private static void SetUpWeatherBranches()
         {
+            // add the keys to the main dict because it's easier for the user to speak less
+            Func<string, Action> getWeatherFunction = (commandText) => new WeatherAction(commandText);
+            actionTree.Add("weather", getWeatherFunction);
+        }
 
+        private static void SetUpVoiceNoteBranches()
+        {
+            var voiceNoteDict = new Dictionary<string, dynamic>();
+            Func<string, Action> recordVoiceNote = (commandText) => new VoiceMemoAction(commandText);
+            voiceNoteDict.Add("Record", recordVoiceNote);
+            voiceNoteDict.Add("Take", recordVoiceNote);
+            actionTree.Add("Voice", voiceNoteDict);
+        }
+
+        private static void SetUpInternetSearchBranches()
+        {
+            var internetSearchDict = new Dictionary<string, dynamic>();
+            Func<string, Action> searchInternet = (commandText) => new WebsiteSearchAction(commandText);
+            internetSearchDict.Add("who", searchInternet);
+            internetSearchDict.Add("what", searchInternet);
+            internetSearchDict.Add("when", searchInternet);
+            internetSearchDict.Add("where", searchInternet);
+            internetSearchDict.Add("why", searchInternet);
+            internetSearchDict.Add("how", searchInternet);
+            internetSearchDict.Add("did", searchInternet);
+            internetSearchDict.Add("was", searchInternet);
+            internetSearchDict.Add("are", searchInternet);
+            internetSearchDict.Add("is", searchInternet);
+            actionTree.Add("internet", internetSearchDict);
+        }
+
+        private static void SetUpTimeBranches()
+        {
+            Func<string, Action> getTimeAndDate = (commandText) => new TimeAction(commandText);
+            // set directly to the action tree as saying "what time is it" is more natural than saying something else
+            actionTree.Add("date", getTimeAndDate);
+            actionTree.Add("time", getTimeAndDate);
+        }
+
+        private static void SetUpReminderBranches()
+        {
+            // a dictionary that takes a string for the key and returns a lambda that takes a string for the command and returns an ReminderAction
+            var reminderDict = new Dictionary<string, dynamic>();
+            // the different types of actions that can be taken for an reminder
+            Func<string, Action> createReminder = (commandText) => new ReminderAction(ReminderAction.ReminderActionTypes.CREATE, commandText);
+            Func<string, Action> deleteReminder = (commandText) => new ReminderAction(ReminderAction.ReminderActionTypes.DELETE, commandText);
+            Func<string, Action> editReminder = (commandText) => new ReminderAction(ReminderAction.ReminderActionTypes.EDIT, commandText);
+            /* add the different key phrases for the reminder creation, update, and deletion*/
+            // create reminder ====================
+            reminderDict.Add("create", createReminder);
+            reminderDict.Add("set", createReminder);
+            reminderDict.Add("new", createReminder);
+            reminderDict.Add("add", createReminder);
+            // edit reminder ======================
+            reminderDict.Add("edit", editReminder);
+            reminderDict.Add("update", editReminder);
+            reminderDict.Add("change", editReminder);
+            reminderDict.Add("alter", editReminder);
+            // delete reminder ====================
+            reminderDict.Add("delete", deleteReminder);
+            reminderDict.Add("remove", deleteReminder);
+            reminderDict.Add("clear", deleteReminder);
+            reminderDict.Add("void", deleteReminder);
+            reminderDict.Add("cancel", deleteReminder);
+            // add the reminder dict to the main one
+            actionTree.Add("reminder", reminderDict);
         }
 
         private static void SetUpAlarmBranches()
@@ -46,6 +116,7 @@ namespace Capstone.Actions
             alarmDict.Add("remove", deleteAlarm);
             alarmDict.Add("clear", deleteAlarm);
             alarmDict.Add("void", deleteAlarm);
+            alarmDict.Add("cancel", deleteAlarm);
             // add the alarm dict to the main one
             actionTree.Add("alarm", alarmDict);
         }
@@ -92,14 +163,21 @@ namespace Capstone.Actions
             return value;
         }
 
+        /// <summary>
+        /// Gets the function for the passed <paramref name="commandString"/> and returns it
+        /// </summary>
+        /// <param name="commandString">the command you want bob to do (e.g. "Set an alarm at 5:30 A.M.")</param>
+        /// <returns></returns>
         public static Func<string, Action> GetFunctionFromCommandString(string commandString)
         {
             dynamic currentNode = actionTree;
+            // quasi-recursively traverse the tree and update our currentNode until it's either null or a function
             while (currentNode != null && currentNode.GetType() != typeof(Func<string, Action>))
             {
                 currentNode = GetNextNodeInChain(commandString, currentNode);
             }
-            // at this point it should be a func
+
+            // at this point it should be a func or null
             return currentNode;
         }
     }

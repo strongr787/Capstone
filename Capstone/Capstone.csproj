@@ -119,6 +119,7 @@
     <Compile Include="Actions\Action.cs" />
     <Compile Include="Actions\ActionRouter.cs" />
     <Compile Include="Actions\AlarmAction.cs" />
+    <Compile Include="Actions\ReminderAction.cs" />
     <Compile Include="AlarmsFormPage.xaml.cs">
       <DependentUpon>AlarmsFormPage.xaml</DependentUpon>
     </Compile>
