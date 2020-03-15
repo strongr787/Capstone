@@ -116,6 +116,9 @@
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Actions\Action.cs" />
+    <Compile Include="Actions\ActionRouter.cs" />
+    <Compile Include="Actions\AlarmAction.cs" />
     <Compile Include="AlarmsFormPage.xaml.cs">
       <DependentUpon>AlarmsFormPage.xaml</DependentUpon>
     </Compile>
