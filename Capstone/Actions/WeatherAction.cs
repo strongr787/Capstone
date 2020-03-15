@@ -1,6 +1,6 @@
 ﻿namespace Capstone.Actions
 {
-    class WeatherAction : Action
+    public class WeatherAction : Action
     {
 
         public WeatherAction(string CommandString)

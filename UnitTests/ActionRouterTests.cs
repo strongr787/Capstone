@@ -79,5 +79,17 @@ namespace UnitTests
             const string commandString = "Made you look!";
             Assert.IsNull(ActionRouter.GetFunctionFromCommandString(commandString));
         }
+
+        [TestMethod]
+        public void TestGetFunctionFromCommandStringReturnsExpectedFunctionWhenShallowFunction()
+        {
+            // tests that the GetFunctionFromCommandString function still works even if it's not working on a nested Dictionary
+            ActionRouter.SetUp();
+            const string commandString = "Get the weather for tomorrow";
+            Func<string, Capstone.Actions.Action> returnedFunction = ActionRouter.GetFunctionFromCommandString(commandString);
+            Assert.IsNotNull(returnedFunction);
+            WeatherAction returnedAction = (WeatherAction)returnedFunction(commandString);
+            Assert.IsNotNull(returnedAction);
+        }
     }
 }

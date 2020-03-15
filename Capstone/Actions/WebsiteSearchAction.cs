@@ -1,6 +1,6 @@
 ﻿namespace Capstone.Actions
 {
-    class WebsiteSearchAction : Action
+    public class WebsiteSearchAction : Action
     {
         private string WebsiteName { get; set; }
         private string SearchText { get; set; }

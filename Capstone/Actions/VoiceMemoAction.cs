@@ -1,6 +1,6 @@
 ﻿namespace Capstone.Actions
 {
-    class VoiceMemoAction : Action
+    public class VoiceMemoAction : Action
     {
         private string VoiceMemoTitle { get; set; }
 
