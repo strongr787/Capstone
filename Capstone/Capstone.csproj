@@ -116,6 +116,15 @@
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Actions\Action.cs" />
+    <Compile Include="Actions\ActionRouter.cs" />
+    <Compile Include="Actions\AlarmAction.cs" />
+    <Compile Include="Actions\DirectionsAction.cs" />
+    <Compile Include="Actions\ReminderAction.cs" />
+    <Compile Include="Actions\TimeAction.cs" />
+    <Compile Include="Actions\VoiceMemoAction.cs" />
+    <Compile Include="Actions\WeatherAction.cs" />
+    <Compile Include="Actions\WebsiteSearchAction.cs" />
     <Compile Include="AlarmsFormPage.xaml.cs">
       <DependentUpon>AlarmsFormPage.xaml</DependentUpon>
     </Compile>

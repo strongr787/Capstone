@@ -1,0 +1,184 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace Capstone.Actions
+{
+    public static class ActionRouter
+    {
+        // a case-insensitive dictionary. Due to runtime binding the second argument needs to be set to "dynamic". In practice, this value is  Dictionary<string, dynamic>. The dynamic keeps going until a value of type Func<string, Action> is reached
+        private static Dictionary<string, dynamic> actionTree;
+
+        public static void SetUp()
+        {
+            // initialize the action tree
+            actionTree = new Dictionary<string, dynamic>();
+            // add all the main keys to the dictionary
+            SetUpAlarmBranches();
+            SetUpReminderBranches();
+            SetUpTimeBranches();
+            SetUpInternetSearchBranches();
+            SetUpWeatherBranches();
+            SetUpVoiceNoteBranches();
+        }
+
+        private static void SetUpWeatherBranches()
+        {
+            // add the keys to the main dict because it's easier for the user to speak less
+            Func<string, Action> getWeatherFunction = (commandText) => new WeatherAction(commandText);
+            actionTree.Add("weather", getWeatherFunction);
+        }
+
+        private static void SetUpVoiceNoteBranches()
+        {
+            var voiceNoteDict = new Dictionary<string, dynamic>();
+            Func<string, Action> recordVoiceNote = (commandText) => new VoiceMemoAction(commandText);
+            voiceNoteDict.Add("Record", recordVoiceNote);
+            voiceNoteDict.Add("Take", recordVoiceNote);
+            actionTree.Add("Voice", voiceNoteDict);
+        }
+
+        private static void SetUpInternetSearchBranches()
+        {
+            var internetSearchDict = new Dictionary<string, dynamic>();
+            Func<string, Action> searchInternet = (commandText) => new WebsiteSearchAction(commandText);
+            internetSearchDict.Add("who", searchInternet);
+            internetSearchDict.Add("what", searchInternet);
+            internetSearchDict.Add("when", searchInternet);
+            internetSearchDict.Add("where", searchInternet);
+            internetSearchDict.Add("why", searchInternet);
+            internetSearchDict.Add("how", searchInternet);
+            internetSearchDict.Add("did", searchInternet);
+            internetSearchDict.Add("was", searchInternet);
+            internetSearchDict.Add("are", searchInternet);
+            internetSearchDict.Add("is", searchInternet);
+            actionTree.Add("internet", internetSearchDict);
+        }
+
+        private static void SetUpTimeBranches()
+        {
+            Func<string, Action> getTimeAndDate = (commandText) => new TimeAction(commandText);
+            // set directly to the action tree as saying "what time is it" is more natural than saying something else
+            actionTree.Add("date", getTimeAndDate);
+            actionTree.Add("time", getTimeAndDate);
+        }
+
+        private static void SetUpReminderBranches()
+        {
+            // a dictionary that takes a string for the key and returns a lambda that takes a string for the command and returns an ReminderAction
+            var reminderDict = new Dictionary<string, dynamic>();
+            // the different types of actions that can be taken for an reminder
+            Func<string, Action> createReminder = (commandText) => new ReminderAction(ReminderAction.ReminderActionTypes.CREATE, commandText);
+            Func<string, Action> deleteReminder = (commandText) => new ReminderAction(ReminderAction.ReminderActionTypes.DELETE, commandText);
+            Func<string, Action> editReminder = (commandText) => new ReminderAction(ReminderAction.ReminderActionTypes.EDIT, commandText);
+            /* add the different key phrases for the reminder creation, update, and deletion*/
+            // create reminder ====================
+            reminderDict.Add("create", createReminder);
+            reminderDict.Add("set", createReminder);
+            reminderDict.Add("new", createReminder);
+            reminderDict.Add("add", createReminder);
+            // edit reminder ======================
+            reminderDict.Add("edit", editReminder);
+            reminderDict.Add("update", editReminder);
+            reminderDict.Add("change", editReminder);
+            reminderDict.Add("alter", editReminder);
+            // delete reminder ====================
+            reminderDict.Add("delete", deleteReminder);
+            reminderDict.Add("remove", deleteReminder);
+            reminderDict.Add("clear", deleteReminder);
+            reminderDict.Add("void", deleteReminder);
+            reminderDict.Add("cancel", deleteReminder);
+            // add the reminder dict to the main one
+            actionTree.Add("reminder", reminderDict);
+        }
+
+        private static void SetUpAlarmBranches()
+        {
+            // a dictionary that takes a string for the key and returns a lambda that takes a string for the command and returns an AlarmAction
+            var alarmDict = new Dictionary<string, dynamic>();
+            // the different types of actions that can be taken for an alarm
+            Func<string, Action> createAlarm = (commandText) => new AlarmAction(AlarmAction.AlarmActionTypes.CREATE, commandText);
+            Func<string, Action> deleteAlarm = (commandText) => new AlarmAction(AlarmAction.AlarmActionTypes.DELETE, commandText);
+            Func<string, Action> editAlarm = (commandText) => new AlarmAction(AlarmAction.AlarmActionTypes.EDIT, commandText);
+            /* add the different key phrases for the alarm creation, update, and deletion*/
+            // create alarm ====================
+            alarmDict.Add("create", createAlarm);
+            alarmDict.Add("set", createAlarm);
+            alarmDict.Add("new", createAlarm);
+            alarmDict.Add("add", createAlarm);
+            // edit alarm ======================
+            alarmDict.Add("edit", editAlarm);
+            alarmDict.Add("update", editAlarm);
+            alarmDict.Add("change", editAlarm);
+            alarmDict.Add("alter", editAlarm);
+            // delete alarm ====================
+            alarmDict.Add("delete", deleteAlarm);
+            alarmDict.Add("remove", deleteAlarm);
+            alarmDict.Add("clear", deleteAlarm);
+            alarmDict.Add("void", deleteAlarm);
+            alarmDict.Add("cancel", deleteAlarm);
+            // add the alarm dict to the main one
+            actionTree.Add("alarm", alarmDict);
+        }
+
+        /// <summary>
+        /// Searches through the passed <paramref name="DictToCheck"/> for a keyword that most matches a word in the passed <paramref name="inputString"/>
+        /// </summary>
+        /// <param name="inputString">A string that contains any amount of text. Each space-separated word is used in an attemptto match against a key in the dictionary</param>
+        /// <param name="DictToCheck">The dictionary whose keys will be checked for a keyword</param>
+        /// <returns>The found keyword if one was found, otherwise null is returned</returns>
+        public static string FindKeyword(string inputString, Dictionary<string, dynamic> DictToCheck)
+        {
+            string foundKeyword = null;
+            // split the inputString into tokens
+            string[] tokens = inputString.ToLower().Split(" ");
+            List<string> keys = DictToCheck.Keys.ToList();
+            // iterate through the keys to find the keyword
+            foreach (string key in keys)
+            {
+                if (tokens.Contains(key.ToLower()))
+                {
+                    foundKeyword = key;
+                    break;
+                }
+            }
+            return foundKeyword;
+        }
+
+        /// <summary>
+        /// Finds a keyword from the <paramref name="inputString"/> that exists within the key set of the <paramref name="DictToCheck"/>, and then returns the value assigned to that key
+        /// </summary>
+        /// <param name="inputString">a phrase that may contain a keyword that the DictToCheck has</param>
+        /// <param name="DictToCheck">The dictionary whose keys are being checked to see if the keyword exists</param>
+        /// <returns>a dynamic value, but the type will either be a Dictionary&lt;string, Func&gt; or a Func object</returns>
+        public static dynamic GetNextNodeInChain(string inputString, Dictionary<string, dynamic> DictToCheck)
+        {
+            dynamic value = null;
+            // get the keyword from the inputString
+            var keyword = FindKeyword(inputString, DictToCheck);
+            if (keyword != null)
+            {
+                value = DictToCheck[keyword];
+            }
+            return value;
+        }
+
+        /// <summary>
+        /// Gets the function for the passed <paramref name="commandString"/> and returns it
+        /// </summary>
+        /// <param name="commandString">the command you want bob to do (e.g. "Set an alarm at 5:30 A.M.")</param>
+        /// <returns></returns>
+        public static Func<string, Action> GetFunctionFromCommandString(string commandString)
+        {
+            dynamic currentNode = actionTree;
+            // quasi-recursively traverse the tree and update our currentNode until it's either null or a function
+            while (currentNode != null && currentNode.GetType() != typeof(Func<string, Action>))
+            {
+                currentNode = GetNextNodeInChain(commandString, currentNode);
+            }
+
+            // at this point it should be a func or null
+            return currentNode;
+        }
+    }
+}
