@@ -52,7 +52,7 @@ namespace Capstone
 
         private void DataPrivacyButton_Click(object sender, RoutedEventArgs e)
         {
-            // TODO navigate to settings screen (this.Frame.Navigate(typeof(screenName)))
+            this.Frame.Navigate(typeof(DataPrivacyTips));
         }
 
         private void LibrariesButton_Click(object sender, RoutedEventArgs e)
