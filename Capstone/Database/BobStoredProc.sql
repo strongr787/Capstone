@@ -10,7 +10,7 @@ SET NOCOUNT ON;		-- Report only errors
 DROP PROCEDURE CreateReminder;  
 GO  
 
-go
+
 CREATE PROCEDURE CreateReminder
 	@Title NVARCHAR(255),
 	@Time TIME,
@@ -29,7 +29,7 @@ go
 DROP PROCEDURE UpdateReminder;  
 GO  
 
-go
+
 CREATE PROCEDURE UpdateReminder
 	@Title NVARCHAR(255),
 	@Time TIME,
@@ -47,7 +47,7 @@ GO
 DROP PROCEDURE DeleteReminder;  
 GO  
 
-go
+
 CREATE PROCEDURE DeleteReminder
 
 	@ID int
@@ -61,7 +61,7 @@ GO
 DROP PROCEDURE QueryReminder;  
 GO  
 
-go
+
 CREATE PROCEDURE QueryReminder
 	@ID int = null
 AS BEGIN
@@ -81,7 +81,7 @@ GO
 DROP PROCEDURE CreateAlarm;  
 GO  
 
-go
+
 CREATE PROCEDURE CreateAlarm
 	@Title NVARCHAR(255),
 	@Time TIME,
@@ -98,7 +98,7 @@ go
 DROP PROCEDURE UpdateAlarm;  
 GO  
 
-go
+
 CREATE PROCEDURE UpdateAlarm
 	@Title NVARCHAR(255),
 	@Time TIME,
@@ -114,7 +114,7 @@ GO
 DROP PROCEDURE DeleteAlarm;  
 GO  
 
-go
+
 CREATE PROCEDURE DeleteAlarm
 
 	@ID int
@@ -131,7 +131,7 @@ GO
 DROP PROCEDURE QueryAlarm;  
 GO  
 
-go
+
 CREATE PROCEDURE QueryAlarm
 	@ID int = null
 AS BEGIN
@@ -151,7 +151,7 @@ GO
 DROP PROCEDURE CreateVoiceNote;  
 GO  
 
-go
+
 CREATE PROCEDURE CreateVoiceNote
 	@FileName			VARCHAR(255),
 	@DisplayName		NVARCHAR(255),
@@ -172,7 +172,7 @@ go
 DROP PROCEDURE DeleteVoiceNote;  
 GO  
 
-go
+
 CREATE PROCEDURE DeleteVoiceNote
 
 	@ID int
@@ -186,7 +186,7 @@ GO
 DROP PROCEDURE UpdateVoiceNote;  
 GO  
 
-go
+
 CREATE PROCEDURE UpdateVoiceNote
 
 	@Title NVARCHAR(255),
@@ -202,7 +202,6 @@ GO
 DROP PROCEDURE QueryWeatherProvider;  
 GO  
 
-go
 CREATE PROCEDURE QueryWeatherProvider
 	@ID int = null
 AS BEGIN
@@ -220,7 +219,7 @@ GO
 DROP PROCEDURE QueryMapProvider;  
 GO  
 
-go
+
 CREATE PROCEDURE QueryMapProvider
 	@ID int = null
 AS BEGIN
@@ -240,7 +239,7 @@ GO
 DROP PROCEDURE QuerySearchableWebsites;  
 GO  
 
-go
+
 CREATE PROCEDURE QuerySearchableWebsites
 	@ID int = null
 AS BEGIN
@@ -257,7 +256,7 @@ GO
 DROP PROCEDURE QuerySearchEngine;  
 GO  
 
-go
+
 CREATE PROCEDURE QuerySearchEngine
 	@ID int = null
 AS BEGIN
@@ -273,7 +272,7 @@ GO
 DROP PROCEDURE QueryWeatherProviderNames;  
 GO  
 
-go
+
 CREATE PROCEDURE QueryWeatherProviderNames
 	
 AS BEGIN
@@ -286,7 +285,6 @@ GO
 DROP PROCEDURE QueryMapProviderNames;  
 GO  
 
-go
 CREATE PROCEDURE QueryMapProviderNames
 	
 AS BEGIN
@@ -301,7 +299,7 @@ GO
 DROP PROCEDURE QuerySearchableWebsiteNames;  
 GO  
 
-go
+
 CREATE PROCEDURE QuerySearchableWebsiteNames
 	
 AS BEGIN
@@ -315,7 +313,7 @@ GO
 DROP PROCEDURE QueryAllSettings;  
 GO  
 
-go
+
 CREATE PROCEDURE QueryAllSettings
 @ID int = null
 AS BEGIN
@@ -332,7 +330,7 @@ GO
 DROP PROCEDURE UpdateSetting;  
 GO  
 
-go
+
 CREATE PROCEDURE UpdateSetting
 @ID int,
 @SELECTED bit
