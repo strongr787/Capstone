@@ -40,8 +40,8 @@
                 <TextBlock Height="auto" TextWrapping="Wrap" Margin="100,0,0,0" FontSize="20">
                 Google collects any data about you that they can collect. They most likley know your alternative email addresses, birthday,
                 and other person information without your knowledge. Therefore, it is recommended if you value your priavcy, to immediately 
-                stop using as much of their services as you can, and delete as much information as possible. You find out how to delete your information
-                from Google with the following link.
+                stop using as much of their services as you can, and delete as much information as possible. To find out how to delete your information
+                from Google, please click the following link:
                 <Hyperlink NavigateUri="https://support.google.com/websearch/answer/465?co=GENIE.Platform%3DDesktop">Delete Google Activity</Hyperlink>
                 </TextBlock>
                 <TextBlock Margin="0, 25, 0,0" FontWeight="Bold" FontSize="30"> <Underline>Microsoft</Underline></TextBlock>
