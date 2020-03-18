@@ -78,6 +78,12 @@ namespace Capstone.Common
             return this;
         }
 
+        public SSMLBuilder Sub(string text, string substitute)
+        {
+            this.ssmlText += $"<sub alias='{substitute}'>{text}</sub>";
+            return this;
+        }
+
         public enum SayAsTypes
         {
             ADDRESS = 0,
