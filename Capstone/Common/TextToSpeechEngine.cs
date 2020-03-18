@@ -49,7 +49,7 @@ namespace Capstone.Common
 
         public SSMLBuilder Break(int duration = 0)
         {
-            this.ssmlText += $"<break {(duration > 0 ? $"time='{duration}'" : "")}/>";
+            this.ssmlText += $"<break {(duration > 0 ? $"time='{duration}' " : "")}/>";
             return this;
         }
 
@@ -67,7 +67,7 @@ namespace Capstone.Common
 
         public SSMLBuilder Prosody(string text, string pitch = "", string contour = "", string range = "", string rate = "", string duration = "")
         {
-            this.ssmlText += $"<prosody {(pitch.Length > 0 ? $"pitch='{pitch}'" : "")} {(contour.Length > 0 ? $"contour='{contour}'" : "")} {(range.Length > 0 ? $"range='{range}'" : "")} {(rate.Length > 0 ? $"rate='{rate}'" : "")} {(duration.Length > 0 ? $"duration='{duration}'" : "")}>{text}</prosody>";
+            this.ssmlText += $"<prosody{(pitch.Length > 0 ? $" pitch='{pitch}'" : "")}{(contour.Length > 0 ? $" contour='{contour}'" : "")}{(range.Length > 0 ? $" range='{range}'" : "")}{(rate.Length > 0 ? $" rate='{rate}'" : "")}{(duration.Length > 0 ? $" duration='{duration}'" : "")}>{text}</prosody>";
             return this;
         }
 

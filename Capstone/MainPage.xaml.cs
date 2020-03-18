@@ -16,8 +16,6 @@ namespace Capstone
             this.InitializeComponent();
             // hide the main menu
             this.MenuColumn.Width = new GridLength(0);
-            string ssmlText = new SSMLBuilder().Sentence("Hello, World!").Prosody("This is some prosody", contour: "(50%,+20%) (90%,-30%)").SayAs("6720 Wesselman Rd. Cleves, OH 45002", SSMLBuilder.SayAsTypes.ADDRESS).Build();
-            TextToSpeechEngine.SpeakSSMLText(this.media, ssmlText);
         }
 
         private void MenuButton_OnClick(object sender, RoutedEventArgs e)
