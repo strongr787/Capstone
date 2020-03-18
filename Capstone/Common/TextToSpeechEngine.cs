@@ -76,6 +76,16 @@ namespace Capstone.Common
             return this;
         }
 
+        /// <summary>
+        /// This is where the vocal inflections take place. It's a little complicated, and <a href="https://docs.microsoft.com/en-us/cortana/skills/speech-synthesis-markup-language#prosody-element">Microsoft's documentation</a> does a good job explaining it.
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="pitch"></param>
+        /// <param name="contour"></param>
+        /// <param name="range"></param>
+        /// <param name="rate"></param>
+        /// <param name="duration"></param>
+        /// <returns></returns>
         public SSMLBuilder Prosody(string text, string pitch = "", string contour = "", string range = "", string rate = "", string duration = "")
         {
             this.ssmlText += $"<prosody{(pitch.Length > 0 ? $" pitch='{pitch}'" : "")}{(contour.Length > 0 ? $" contour='{contour}'" : "")}{(range.Length > 0 ? $" range='{range}'" : "")}{(rate.Length > 0 ? $" rate='{rate}'" : "")}{(duration.Length > 0 ? $" duration='{duration}'" : "")}>{text}</prosody>";
