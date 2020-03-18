@@ -21,7 +21,13 @@ namespace Capstone.Common
             media.Play();
         }
 
-        public static async void SpeakSSMLText(MediaElement media, string ssmlText)
+        /// <summary>
+        /// Speaks text with inflections. The inflections are defined in an xml-like format called SSML (Speech Synthesis Markup Language). To learn more, go to
+        /// <a href="https://docs.microsoft.com/en-us/cortana/skills/speech-synthesis-markup-language">this documentation link</a>
+        /// </summary>
+        /// <param name="media">The media element to speak the text through</param>
+        /// <param name="ssmlText"> the SSML markup to provide inflection data and the words to speak</param>
+        public static async void SpeakInflectedText(MediaElement media, string ssmlText)
         {
             var synth = new SpeechSynthesizer();
             // create the audio stream from our text
@@ -32,6 +38,11 @@ namespace Capstone.Common
         }
     }
 
+    /// <summary>
+    /// A builder class to build a syntactically valid SSML markup string to be used in <see cref="TextToSpeechEngine.SpeakInflectedText(MediaElement, string)"/>.
+    /// <br />
+    /// To learn more about SSML, go to <a href="https://docs.microsoft.com/en-us/cortana/skills/speech-synthesis-markup-language">this documentation link provided by Mircosoft</a>
+    /// </summary>
     public class SSMLBuilder
     {
         public string ssmlText { get; private set; } = "";
