@@ -34,7 +34,7 @@ namespace Capstone
 
         private void HyperlinkButton_Click(object sender, RoutedEventArgs e)
         {
-
+            //TO DO Navigate to Libraries page when setup
         }
     }
 }
