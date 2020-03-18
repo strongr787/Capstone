@@ -94,7 +94,7 @@ CREATE TABLE TSearchableWebsites
 
 CREATE TABLE TAlarms
 (						
-	 alarmID							INTEGER			NOT NULL
+	 alarmID							INTEGER			IDENTITY(1,1) NOT NULL
 	,alarmTime							TIME			NOT NULL
 	,alarmTitle							NVARCHAR(255)	NOT NULL
 	,isDeleted							BIT				NOT NULL
@@ -103,7 +103,7 @@ CREATE TABLE TAlarms
 
 CREATE TABLE TAlarmDates
 (						
-	 alarmDateID						INTEGER			NOT NULL
+	 alarmDateID						INTEGER			IDENTITY(1,1) NOT NULL
 	,alarmID							INTEGER			NOT NULL
 	,alarmDate							DATETIME		NOT NULL
 	,CONSTRAINT TAlarmDates_PK PRIMARY KEY ( alarmDateID )
@@ -111,7 +111,7 @@ CREATE TABLE TAlarmDates
 
 CREATE TABLE TReminders
 (
-	 reminderID							INTEGER			NOT NULL
+	 reminderID							INTEGER			IDENTITY(1,1) NOT NULL
 	,reminderTitle						NVARCHAR(255)	NOT NULL
 	,reminderTime						TIME			NOT NULL
 	,isDeleted							BIT				NOT NULL
@@ -120,7 +120,7 @@ CREATE TABLE TReminders
 
 CREATE TABLE TReminderDates
 (
-	 reminderDateID						INTEGER			NOT NULL
+	 reminderDateID						INTEGER			IDENTITY(1,1) NOT NULL
 	,reminderID							INTEGER			NOT NULL
 	,reminderDate						DATETIME		NOT NULL
 	,CONSTRAINT TReminderDates_PK PRIMARY KEY ( reminderDateID )
@@ -162,7 +162,7 @@ CREATE TABLE TMapProvidersURLParts
 
 CREATE TABLE TVoiceMemos
 (
-	 voiceMemoID						INTEGER			NOT NULL
+	 voiceMemoID						INTEGER			IDENTITY(1,1) NOT NULL
 	,[fileName]							VARCHAR(255)	NOT NULL -- fileName on its own is a keyword so we need to wrap it in square brackets
 	,displayName						NVARCHAR(255)	NOT NULL
 	,recordingDuration					INTEGER			NOT NULL
