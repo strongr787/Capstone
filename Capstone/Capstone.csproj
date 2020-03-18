@@ -136,6 +136,9 @@
     </Compile>
     <Compile Include="Common\StringUtils.cs" />
     <Compile Include="Common\UIUtils.cs" />
+    <Compile Include="DataPrivacyTips.xaml.cs">
+      <DependentUpon>DataPrivacyTips.xaml</DependentUpon>
+    </Compile>
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
@@ -187,6 +190,10 @@
     <Page Include="AlarmsPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="DataPrivacyTips.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="MainPage.xaml">
       <Generator>MSBuild:Compile</Generator>
