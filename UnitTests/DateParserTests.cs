@@ -62,9 +62,14 @@ namespace UnitTests
 
             DateTime beforeMonthDate = DateParser.ParseExactDate(dayBeforeMonth);
             DateTime afterMonthDate = DateParser.ParseExactDate(dayAfterMonth);
+            // the expected values
+            var expectedBeforeMonth = new DateTime(2020, 3, 5);
+            var expectedAfterMonth = new DateTime(2020, 10, 22);
 
-            Assert.AreEqual(new DateTime(2020, 3, 5), beforeMonthDate);
-            Assert.AreEqual(new DateTime(2020, 10, 22), afterMonthDate);
+            Assert.AreEqual(expectedBeforeMonth.Day, beforeMonthDate.Day);
+            Assert.AreEqual(expectedBeforeMonth.Month, beforeMonthDate.Month);
+            Assert.AreEqual(expectedAfterMonth.Day, afterMonthDate.Day);
+            Assert.AreEqual(expectedAfterMonth.Month, afterMonthDate.Month);
         }
 
         [TestMethod]
@@ -73,13 +78,38 @@ namespace UnitTests
             try
             {
                 DateParser.ParseExactDate("");
-            } catch(DateParseException)
+            }
+            catch (DateParseException)
             {
                 Assert.IsTrue(true); // just to have an assert
-            } catch(Exception e)
+            }
+            catch (Exception e)
             {
                 Assert.Fail("A general exception means something else failed: " + e.Message);
             }
+        }
+
+        [TestMethod]
+        public void TestParseExactDateShiftsYearIfMonthIsPassed()
+        {
+            // the "today" used to prevent this test from failing after the months have changed
+            var today = new DateTime(2020, 6, 1);
+
+            // another test handles the placement of the day, this one only needs to check for one day placement
+            var input = "Set an alarm for the 1st of May";
+            DateTime expectedDate = new DateTime(2021, 5, 1);
+            DateTime actualDate = DateParser.ParseExactDate(input, today);
+            Assert.AreEqual(expectedDate, actualDate);
+        }
+
+        [TestMethod]
+        public void TestGetNextOccurrenceOfDateProperlyShiftsDate()
+        {
+            // the date we're using as the "now" for the test method
+            var now = new DateTime(2020, 3, 19);
+            var day = 18;
+            var month = 3;
+            Assert.AreEqual(new DateTime(2021, 3, 18), DateParser.GetNextOccurrenceOfDate(day, month, now));
         }
     }
 }
