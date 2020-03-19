@@ -41,6 +41,6 @@
         <!--the width for now is just temporary. It will be overridden in code-->
         <Canvas x:Name="DynamicArea" Grid.Row="1" Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Width="900" Margin="25,0,25,0"></Canvas>
         <TextBox Grid.Row="2" Grid.Column="1" x:Name="CommandBox" Margin="25" Text="" TextWrapping="Wrap" PlaceholderText="Type a command for Bob to do, or question for him to answer" Height="32" VerticalAlignment="Top"/>
-
+        <MediaElement x:Name="media" Visibility="Collapsed"/>
     </Grid>
 </Page>
