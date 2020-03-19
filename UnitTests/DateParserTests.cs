@@ -1,10 +1,6 @@
 ﻿using Capstone.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace UnitTests
 {
@@ -24,7 +20,7 @@ namespace UnitTests
             {
                 DateParser.ParseWeekDayFromString("The day of the week is");
             }
-            catch (FormatException)
+            catch (DateParseException)
             {
                 Assert.IsTrue(true);
             }
@@ -35,7 +31,7 @@ namespace UnitTests
         }
 
         [TestMethod]
-        public void TestGetDateForNextWeekDay()
+        public void TestGetDateForNextWeekDayReturnsCorrectDate()
         {
             // we need to use a fixed date for this test to work. The date in this case is Sunday, March 1st 2020
             var today = new DateTime(2020, 3, 1);
@@ -44,6 +40,46 @@ namespace UnitTests
             var expectedDate = new DateTime(2020, 3, 11);
             var actualDate = DateParser.GetDateForNextWeekDay(nextDay, today);
             Assert.AreEqual(expectedDate, actualDate);
+        }
+
+        [TestMethod]
+        public void TestGetDateForThisWeekDayReturnsCorrectDate()
+        {
+            // we need to use a fixed date for this test to work. The date in this case is Sunday, March 1st 2020
+            var today = new DateTime(2020, 3, 1);
+            var nextDay = DayOfWeek.Wednesday;
+            // the date we're expecting is Wednesday, March 4th 2020
+            var expectedDate = new DateTime(2020, 3, 4);
+            var actualDate = DateParser.GetDateForThisWeekDay(nextDay, today);
+            Assert.AreEqual(expectedDate, actualDate);
+        }
+
+        [TestMethod]
+        public void TestParseExactDateReturnsCorrectDateObject()
+        {
+            var dayBeforeMonth = "set an alarm for the 05th of March";
+            var dayAfterMonth = "add a reminder for october 22nd";
+
+            DateTime beforeMonthDate = DateParser.ParseExactDate(dayBeforeMonth);
+            DateTime afterMonthDate = DateParser.ParseExactDate(dayAfterMonth);
+
+            Assert.AreEqual(new DateTime(2020, 3, 5), beforeMonthDate);
+            Assert.AreEqual(new DateTime(2020, 10, 22), afterMonthDate);
+        }
+
+        [TestMethod]
+        public void TestParseExactDateThrowsExceptionIfParseFails()
+        {
+            try
+            {
+                DateParser.ParseExactDate("");
+            } catch(DateParseException)
+            {
+                Assert.IsTrue(true); // just to have an assert
+            } catch(Exception e)
+            {
+                Assert.Fail("A general exception means something else failed: " + e.Message);
+            }
         }
     }
 }
