@@ -109,7 +109,37 @@ namespace UnitTests
             var now = new DateTime(2020, 3, 19);
             var day = 18;
             var month = 3;
-            Assert.AreEqual(new DateTime(2021, 3, 18), DateParser.GetNextOccurrenceOfDate(day, month, now));
+            Assert.AreEqual(new DateTime(2021, month, day), DateParser.GetNextOccurrenceOfDate(day, month, now));
+        }
+
+        [TestMethod]
+        public void TestGetNextOccurrenceOfDateDoesNotShiftDateIfItHasNotPassed()
+        {
+            var now = new DateTime(2020, 3, 19);
+            var day = 20;
+            var month = 3;
+            Assert.AreEqual(new DateTime(2020, month, day), DateParser.GetNextOccurrenceOfDate(day, month, now));
+        }
+
+        [TestMethod]
+        public void TestParseSlashOrDashNotationDoesNotShiftYearIfSpecified()
+        {
+            var input = "Set an alarm for 5/5/2020";
+            var expectedDate = new DateTime(2020, 5, 5);
+            var actualDate = DateParser.ParseSlashOrDashNotation(input);
+
+            Assert.AreEqual(expectedDate, actualDate);
+        }
+
+        [TestMethod]
+        public void TestParseSlashOrDashNotationProvidesYearIfNotSpecified()
+        {
+            var input = "Set an alarm for 5-5";
+            // the date used for the starting point so that the test is stable
+            var now = new DateTime(2020, 3, 19);
+            var expectedDate = new DateTime(2020, 5, 5);
+            var actualDate = DateParser.ParseSlashOrDashNotation(input, now);
+            Assert.AreEqual(expectedDate, actualDate);
         }
     }
 }

@@ -127,6 +127,11 @@ namespace Capstone.Common
 
         public static DateTime ParseSlashOrDashNotation(string text)
         {
+            return ParseSlashOrDashNotation(text, DateTime.Now);
+        }
+
+        public static DateTime ParseSlashOrDashNotation(string text, DateTime onlyUsedForTests)
+        {
             DateTime parsedDate;
             // matches a month/day/year pattern using either dashes, slashes, spaces, or periods as the separator
             var withYear = new Regex("[0-9]{1,2}[-/ .][0-9]{1,2}[-/ .][0-9]{4}");
@@ -142,7 +147,7 @@ namespace Capstone.Common
             {
                 // use our method to get the next occurrence of that date
                 var dateWithWrongYear = DateTime.Parse(withoutYearMatch.Value);
-                parsedDate = GetNextOccurrenceOfDate(dateWithWrongYear.Day, dateWithWrongYear.Month);
+                parsedDate = GetNextOccurrenceOfDate(dateWithWrongYear.Day, dateWithWrongYear.Month, onlyUsedForTests);
             }
             else
             {
@@ -162,6 +167,23 @@ namespace Capstone.Common
             return new DateTime(year, month, day);
         }
 
+        /// <summary>
+        /// takes a piece of text and replaces all references of full month names with their numeric counterparts (e.g. January becomes 1, and December becomes 12). The replacing is done ignoring case.
+        /// </summary>
+        /// <param name="text">the text to have all month occurrences replaced in</param>
+        /// <returns></returns>
+        public static string ReplaceMonthNamesWithMonthNumber(string text)
+        {
+            string result = text;
+            // for each month, create a case-insensitive regex for it and use it to replace the text
+            var months = Enum.GetValues(typeof(Months));
+            foreach (Months month in months)
+            {
+                var monthRegex = new Regex($"(?i){month.ToString()}(?-i)");
+                result = monthRegex.Replace(result, ((int)month).ToString());
+            }
+            return result;
+        }
 
         private static int FindFirstIndexOfMonth(string text, Months month)
         {
