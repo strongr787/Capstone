@@ -71,6 +71,12 @@ namespace Capstone.Common
             return GetDateForNextWeekDay(nextDay, DateTime.Now);
         }
 
+        /// <summary>
+        /// Gets the date for a specific day that has yet to occur during this week. To get the next date for a day that has already happened, see <see cref="GetDateForNextWeekDay"/>
+        /// </summary>
+        /// <param name="nextDay">The day of the week to get the date for</param>
+        /// <param name="date">the date that the day of the week should be determined starting from</param>
+        /// <returns></returns>
         public static DateTime GetDateForThisWeekDay(System.DayOfWeek nextDay, DateTime date)
         {
             // get the number of days in between the date's day of the week and the passed nextDay
@@ -89,6 +95,11 @@ namespace Capstone.Common
 
         public static DateTime ParseExactDate(string text)
         {
+            return ParseExactDate(text, DateTime.Now);
+        }
+
+        public static DateTime ParseExactDate(string text, DateTime startingDate)
+        {
             // get the first occurrence of a month within the text
             Months referencedMonth = GetMonthFromString(text);
             if (referencedMonth == Months.NONE)
@@ -98,12 +109,14 @@ namespace Capstone.Common
             // the datetime to return
             DateTime dateTime;
             // get the index of the month in the string and determine where the day of the month is using a regex
-            string pattern = $"[0-9]{{1,2}}(?=(th|rd|st) of {referencedMonth.ToString().ToLower()})|(?<={referencedMonth.ToString().ToLower()} )[0-9]{{1,2}}";
+            string pattern = $"[0-9]{{1,2}}(?=(th|rd|st|nd) of {referencedMonth.ToString().ToLower()})|(?<={referencedMonth.ToString().ToLower()} )[0-9]{{1,2}}";
             Regex dayOfMonthRegex = new Regex(pattern);
             var match = dayOfMonthRegex.Match(text.ToLower());
             if (match.Success)
             {
-                dateTime = new DateTime(DateTime.Now.Year, (int)referencedMonth, int.Parse(match.Value));
+                // check if the month has already passed. If so, we need to shift the year forward
+                var matchedDay = int.Parse(match.Value);
+                dateTime = GetNextOccurrenceOfDate(matchedDay, (int)referencedMonth, startingDate);
             }
             else
             {
@@ -111,6 +124,44 @@ namespace Capstone.Common
             }
             return dateTime;
         }
+
+        public static DateTime ParseSlashOrDashNotation(string text)
+        {
+            DateTime parsedDate;
+            // matches a month/day/year pattern using either dashes, slashes, spaces, or periods as the separator
+            var withYear = new Regex("[0-9]{1,2}[-/ .][0-9]{1,2}[-/ .][0-9]{4}");
+            var withoutYear = new Regex("[0-9]{1,2}[-/ .][0-9]{1,2}");
+            var withYearMatch = withYear.Match(text);
+            var withoutYearMatch = withoutYear.Match(text);
+            if (withYearMatch.Success)
+            {
+                // parse the date outright, there's no need to determine if the year needs to be shifted as it was specified
+                parsedDate = DateTime.Parse(withYearMatch.Value);
+            }
+            else if (withoutYearMatch.Success)
+            {
+                // use our method to get the next occurrence of that date
+                var dateWithWrongYear = DateTime.Parse(withoutYearMatch.Value);
+                parsedDate = GetNextOccurrenceOfDate(dateWithWrongYear.Day, dateWithWrongYear.Month);
+            }
+            else
+            {
+                throw new DateParseException("A date could not be parsed from " + text);
+            }
+            return parsedDate;
+        }
+        private static DateTime GetNextOccurrenceOfDate(int day, int month)
+        {
+            return GetNextOccurrenceOfDate(day, month, DateTime.Now);
+        }
+
+        public static DateTime GetNextOccurrenceOfDate(int day, int month, DateTime onlyUsedForTests)
+        {
+            var now = onlyUsedForTests;
+            var year = (int)month < now.Month || (int)month == now.Month && day < now.Day ? now.Year + 1 : now.Year;
+            return new DateTime(year, month, day);
+        }
+
 
         private static int FindFirstIndexOfMonth(string text, Months month)
         {
