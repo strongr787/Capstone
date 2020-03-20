@@ -1,4 +1,5 @@
-﻿using Windows.UI.Xaml;
+﻿using Capstone.Common;
+using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
 
@@ -19,11 +20,12 @@ namespace Capstone
 
         private void MenuButton_OnClick(object sender, RoutedEventArgs e)
         {
-            if(!this.IsMenuExpanded)
+            if (!this.IsMenuExpanded)
             {
                 // show the menu column
                 this.MenuColumn.Width = new GridLength(320);
-            } else
+            }
+            else
             {
                 this.MenuColumn.Width = new GridLength(0);
             }

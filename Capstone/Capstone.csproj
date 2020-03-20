@@ -135,6 +135,7 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="Common\StringUtils.cs" />
+    <Compile Include="Common\TextToSpeechEngine.cs" />
     <Compile Include="Common\UIUtils.cs" />
     <Compile Include="DataPrivacyTips.xaml.cs">
       <DependentUpon>DataPrivacyTips.xaml</DependentUpon>
@@ -168,7 +169,7 @@
     </AppxManifest>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="InitialScript.sql" />
+    <Content Include="Database\InitialScript.sql" />
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
     <Content Include="Assets\SplashScreen.scale-200.png" />

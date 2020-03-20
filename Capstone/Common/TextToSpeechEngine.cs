@@ -7,30 +7,42 @@ namespace Capstone.Common
     public static class TextToSpeechEngine
     {
         /// <summary>
-        /// Allows for speaking uninflected text in the windows default voice.
+        /// Speaks the passed text in an uninflected voice through the passed MediaElement
         /// </summary>
-        /// <param name="media">A MediaElement, likely one hidden on the page somewhere</param>
-        /// <param name="textToSpeak">The text you want spoken</param>
-        public static async void SpeakText(MediaElement media, string textToSpeak)
+        /// <param name="media"> the media element on the page to play the sound through</param>
+        /// <param name="text">the text to speak</param>
+        public static async void SpeakText(MediaElement media, string text)
         {
-            // create the synthesizer
-            var synthesizer = new SpeechSynthesizer();
-            // synthesize the text and create a stream from it
-            SpeechSynthesisStream stream = await synthesizer.SynthesizeTextToStreamAsync(textToSpeak);
-            // prepare our media to output the stream and then output it
+            var synth = new SpeechSynthesizer();
+            // create the audio stream from our text
+            SpeechSynthesisStream stream = await synth.SynthesizeTextToStreamAsync(text);
+            // prepare the media object to speak and play the audio
             media.SetSource(stream, stream.ContentType);
             media.Play();
         }
 
-        public static async void SpeakInflectedText(MediaElement media, string ssmlTextToSpeak)
+        /// <summary>
+        /// Speaks text with inflections. The inflections are defined in an xml-like format called SSML (Speech Synthesis Markup Language). To learn more, go to
+        /// <a href="https://docs.microsoft.com/en-us/cortana/skills/speech-synthesis-markup-language">this documentation link</a>
+        /// </summary>
+        /// <param name="media">The media element to speak the text through</param>
+        /// <param name="ssmlText"> the SSML markup to provide inflection data and the words to speak</param>
+        public static async void SpeakInflectedText(MediaElement media, string ssmlText)
         {
-            var synthesizer = new SpeechSynthesizer();
-            SpeechSynthesisStream stream = await synthesizer.SynthesizeSsmlToStreamAsync(ssmlTextToSpeak);
+            var synth = new SpeechSynthesizer();
+            // create the audio stream from our text
+            SpeechSynthesisStream stream = await synth.SynthesizeSsmlToStreamAsync(ssmlText);
+            // prepare the media object to speak and play the audio
             media.SetSource(stream, stream.ContentType);
             media.Play();
         }
     }
 
+    /// <summary>
+    /// A builder class to build a syntactically valid SSML markup string to be used in <see cref="TextToSpeechEngine.SpeakInflectedText(MediaElement, string)"/>.
+    /// <br />
+    /// To learn more about SSML, go to <a href="https://docs.microsoft.com/en-us/cortana/skills/speech-synthesis-markup-language">this documentation link provided by Mircosoft</a>
+    /// </summary>
     public class SSMLBuilder
     {
         public string ssmlText { get; private set; } = "";
@@ -40,15 +52,21 @@ namespace Capstone.Common
             this.ssmlText = "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='en-US'>";
         }
 
-        private SSMLBuilder CloseSSMLText()
+        public string Build()
         {
             this.ssmlText += "</speak>";
+            return this.ssmlText;
+        }
+
+        public SSMLBuilder Break(int duration = 0)
+        {
+            this.ssmlText += $"<break {(duration > 0 ? $"time='{duration}' " : "")}/>";
             return this;
         }
 
-        public SSMLBuilder Sentence(string sentence)
+        public SSMLBuilder Sentence(string text)
         {
-            this.ssmlText += $"<sentence>{sentence}</sentence>";
+            this.ssmlText += $"<sentence>{text}</sentence>";
             return this;
         }
 
@@ -58,53 +76,26 @@ namespace Capstone.Common
             return this;
         }
 
-        public SSMLBuilder Break(int amount = 0)
-        {
-            this.ssmlText += $"<break {(amount > 0 ? $"time='{amount}'" : "")}/>";
-            return this;
-        }
-
+        /// <summary>
+        /// This is where the vocal inflections take place. It's a little complicated, and <a href="https://docs.microsoft.com/en-us/cortana/skills/speech-synthesis-markup-language#prosody-element">Microsoft's documentation</a> does a good job explaining it.
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="pitch"></param>
+        /// <param name="contour"></param>
+        /// <param name="range"></param>
+        /// <param name="rate"></param>
+        /// <param name="duration"></param>
+        /// <returns></returns>
         public SSMLBuilder Prosody(string text, string pitch = "", string contour = "", string range = "", string rate = "", string duration = "")
         {
-            this.ssmlText += $"<prosody {(pitch.Length > 0 ? $"pitch='{pitch}'" : "")} {(contour.Length > 0 ? $"contour='{contour}'" : "")} {(range.Length > 0 ? $"range='{range}'" : "")} {(duration.Length > 0 ? $"duration='{duration}'" : "")}>{text}</prosody>";
+            this.ssmlText += $"<prosody{(pitch.Length > 0 ? $" pitch='{pitch}'" : "")}{(contour.Length > 0 ? $" contour='{contour}'" : "")}{(range.Length > 0 ? $" range='{range}'" : "")}{(rate.Length > 0 ? $" rate='{rate}'" : "")}{(duration.Length > 0 ? $" duration='{duration}'" : "")}>{text}</prosody>";
             return this;
         }
 
         public SSMLBuilder SayAs(string text, SayAsTypes type)
         {
-            // convert the type to a string value
-            string sayAsType = null;
-            switch (type)
-            {
-                case SayAsTypes.ADDRESS:
-                    sayAsType = "address";
-                    break;
-                case SayAsTypes.CARDINAL:
-                    sayAsType = "cardinal";
-                    break;
-                case SayAsTypes.CHARACTERS:
-                    sayAsType = "characters";
-                    break;
-                case SayAsTypes.DATE:
-                    sayAsType = "date";
-                    break;
-                case SayAsTypes.DIGITS:
-                    sayAsType = "digits";
-                    break;
-                case SayAsTypes.FRACTION:
-                    sayAsType = "fraction";
-                    break;
-                case SayAsTypes.ORDINAL:
-                    sayAsType = "ordinal";
-                    break;
-                case SayAsTypes.TELEPHONE:
-                    sayAsType = "telephone";
-                    break;
-                case SayAsTypes.TIME:
-                    sayAsType = "time";
-                    break;
-            }
-            this.ssmlText += $"<say-as interpret-as='{sayAsType}'>{text}</say-as>";
+            string sayType = Enum.GetName(typeof(SayAsTypes), type).ToLower();
+            this.ssmlText += $"<say-as interpret-as='{sayType}'>{text}</say-as>";
             return this;
         }
 
@@ -112,12 +103,6 @@ namespace Capstone.Common
         {
             this.ssmlText += $"<sub alias='{substitute}'>{text}</sub>";
             return this;
-        }
-
-        public string Build()
-        {
-            this.CloseSSMLText();
-            return this.ssmlText;
         }
 
         public enum SayAsTypes
