@@ -129,7 +129,7 @@ CREATE TABLE TReminderDates
 
 CREATE TABLE TMapProviders
 (
-	 mapProviderID						INTEGER		    NOT NULL
+	 mapProviderID						INTEGER			NOT NULL
 	,mapProviderName					NVARCHAR(255)	NOT NULL
 	,CONSTRAINT TMapProviders_PK PRIMARY KEY ( mapProviderID )
 )
