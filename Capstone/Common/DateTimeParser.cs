@@ -51,7 +51,9 @@ namespace Capstone.Common
             DAY = 3,
             WEEK = 4,
             MONTH = 5,
-            YEAR = 6
+            YEAR = 6,
+            // this isn't really a unit, but putting it here is the easiest because of where this enum is used
+            TOMORROW = 7
         }
 
         // constant values for names assigned to times of day
@@ -80,7 +82,7 @@ namespace Capstone.Common
         {
             // a copy of the passed time so that we don't screw up the original for later
             var cleanRegex = new Regex("(am|pm)|[ :]");
-            string timeCopy = cleanRegex.Replace(time.ToLower(), "");
+            string timeCopy = cleanRegex.Replace(time.ToLower(), "").Trim();
             // the length of the string changes where we need to insert characters
             if (timeCopy.Length == 1 || timeCopy.Length == 2)
             {
@@ -143,12 +145,12 @@ namespace Capstone.Common
                 throw new DateParseException($"could not find a unit in the passed string [{text}]");
             }
             // create a regex to parse out the number before the returned unit
-            var regexString = $"(?i)[0-9]{{1,3}}(?= {specifiedUnit.ToString()})(?-i)";
+            var regexString = $"(?i)[0-9]{{1,3}}(?= {specifiedUnit.ToString()})|tomorrow(?-i)";
             var regex = new Regex(regexString);
             var match = regex.Match(text);
             if (match.Success)
             {
-                int parsedNumber = int.Parse(match.Value);
+                int parsedNumber = match.Value.ToLower().Equals("tomorrow") ? 1 : int.Parse(match.Value);
                 // figure out which unit to increment
                 switch (specifiedUnit)
                 {
@@ -173,6 +175,10 @@ namespace Capstone.Common
                     case Units.YEAR:
                         offsetDateTime = now.AddYears(parsedNumber);
                         break;
+                    case Units.TOMORROW:
+                        offsetDateTime = now.AddDays(1);
+                        break;
+                    case Units.NONE:
                     default:
                         throw new DateParseException("Something went wrong with adding the unit to the date");
                 }
@@ -245,13 +251,42 @@ namespace Capstone.Common
             return timePart;
         }
 
-        public static DateTime ParseDateTimeFromText(string text)
+        public static DateTime ParseDateTimeFromText(string text, DateTime onlyUsedForTests)
         {
+            var now = onlyUsedForTests;
             // format time values
-            text = FormatTime(ReplaceDaytimeNamesWithTimeValue(text));
-            return DateTime.Now;
+            text = ReplaceDaytimeNamesWithTimeValue(text);
+            DateTime time = ParseTimeFromString(text);
+            // make sure that the parsedTime hasn't happened yet. If it has, add 12 hours to the next instance of that time
+            if (now.TimeOfDay >= time.TimeOfDay)
+            {
+                time = time.AddHours(12);
+            }
+            DateTime date;
+            try
+            {
+                date = ParseDateFromText(text, onlyUsedForTests);
+            }
+            catch (DateParseException)
+            {
+                // this might mean that the date wasn't specified, and it means "today" is implied"
+                date = new DateTime(now.Year, now.Month, now.Day);
+            }
+
+            return date + time.TimeOfDay;
         }
 
+        public static DateTime ParseDateTimeFromText(string text)
+        {
+            return ParseDateTimeFromText(text, DateTime.Now);
+        }
+
+        /// <summary>
+        /// Parses a date from the passed text. The date within the text can be of different formats (e.g. 3/1, 1st of March, 3 days from now, next sunday, this wednesday, tomorrow)
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="onlyUsedForTests"></param>
+        /// <returns></returns>
         public static DateTime ParseDateFromText(string text, DateTime onlyUsedForTests)
         {
             DateTime parsedDateTime;
@@ -264,7 +299,8 @@ namespace Capstone.Common
             var thisWeekDayRegex = new Regex($"(?i)this {daysList}(?-i)");
             var nextWeekDayRegex = new Regex($"(?i)next {daysList}(?-i)");
             // relative dates
-            var relativeDateRegex = new Regex("(?i)from (now|today|this day)(?-i)");
+            var relativeList = Utils.JoinEnum(typeof(Units), "|");
+            var relativeDateRegex = new Regex($"(?i)from (now|today|this day)|{relativeList}(?-i)");
 
             // check each regex and determine which method to call based on the type
             if (slashDashRegex.IsMatch(text))
@@ -403,11 +439,6 @@ namespace Capstone.Common
             string formattedTimePart = FormatTime(timePart);
             var parsedTime = DateTime.Parse(formattedTimePart);
             var parsedDate = onlyUsedForTests.Date + parsedTime.TimeOfDay;
-            // make sure that the parsedTime hasn't happened yet. If it has, add 12 hours to the next instance of that time
-            if (now.TimeOfDay >= parsedTime.TimeOfDay)
-            {
-                parsedDate = parsedDate.AddHours(12);
-            }
             return parsedDate;
         }
 

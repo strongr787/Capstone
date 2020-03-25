@@ -187,12 +187,12 @@ namespace UnitTests
         }
 
         [TestMethod]
-        public void TestParseTimeFromStringAdds12HoursIfTimeHasPassed()
+        public void TestParseDateTimeFromTextAdds12HoursIfTimeHasPassed()
         {
             var inputString = "set an alarm for 7";
             var startingDate = new DateTime(2020, 1, 1, 7, 0, 0);
             var expectedDate = new DateTime(2020, 1, 1, 19, 0, 0);
-            var actualDate = DateTimeParser.ParseTimeFromString(inputString, startingDate);
+            var actualDate = DateTimeParser.ParseDateTimeFromText(inputString, startingDate);
             Assert.AreEqual(expectedDate, actualDate);
         }
 
@@ -235,8 +235,8 @@ namespace UnitTests
             var nextWeekDayExpectedDate = new DateTime(2020, 1, 4);
             var nextWeekDayActualDate = DateTimeParser.ParseDateFromText(nextWeekDayNotaion, now);
             // relative dates (not times)
-            var relativeDateNotation = "set an alarm for 4 days from now at 12";
-            var relativeDateExpectedDate = new DateTime(2020, 1, 5);
+            var relativeDateNotation = "set an alarm for tomorrow from now at 12";
+            var relativeDateExpectedDate = new DateTime(2020, 1, 2);
             var relativeDateActualDate = DateTimeParser.ParseDateFromText(relativeDateNotation, now);
 
             // test the expected dates vs the actual dates
@@ -245,6 +245,16 @@ namespace UnitTests
             Assert.AreEqual(thisWeekDayExpectedDate, thisWeekDayActualDate);
             Assert.AreEqual(nextWeekDayExpectedDate, nextWeekDayActualDate);
             Assert.AreEqual(relativeDateExpectedDate, relativeDateActualDate);
+        }
+
+        [TestMethod]
+        public void TestParseDateTimeFromTextProperlyParsesDateAndTime()
+        {
+            var today = new DateTime(2020, 1, 1);
+            var inputText = "add a reminder for tomorrow morning that I should take out the trash";
+            var expectedDate = new DateTime(2020, 1, 2, 8, 0, 0);
+            var actualDate = DateTimeParser.ParseDateTimeFromText(inputText, today);
+            Assert.AreEqual(expectedDate, actualDate);
         }
     }
 }
