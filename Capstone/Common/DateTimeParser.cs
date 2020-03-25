@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 
@@ -52,6 +53,15 @@ namespace Capstone.Common
             MONTH = 5,
             YEAR = 6
         }
+
+        // constant values for names assigned to times of day
+        public static readonly string MORNING = "8:00 am";
+        public static readonly string NOON = "12:00 pm";
+        public static readonly string DAY = "1:00 pm";
+        public static readonly string AFTERNOON = "4:00 pm";
+        public static readonly string EVENING = "6:00 pm";
+        public static readonly string NIGHT = "8:00 pm";
+        public static readonly string MIDNIGHT = "12:00 am";
 
         /// <summary>
         /// Formats a time-like piece of string to be in a parseable format by <see cref="DateTime.Parse(string)"/>
@@ -197,6 +207,11 @@ namespace Capstone.Common
             return newDate;
         }
 
+        private static DateTime GetDateForThisWeekDay(System.DayOfWeek nextDay)
+        {
+            return GetDateForThisWeekDay(nextDay, DateTime.Now);
+        }
+
         public static DateTime GetNextOccurrenceOfDate(int day, int month, DateTime onlyUsedForTests)
         {
             var now = onlyUsedForTests;
@@ -228,6 +243,61 @@ namespace Capstone.Common
                 timePart = match.Value;
             }
             return timePart;
+        }
+
+        public static DateTime ParseDateTimeFromText(string text)
+        {
+            // format time values
+            text = FormatTime(ReplaceDaytimeNamesWithTimeValue(text));
+            return DateTime.Now;
+        }
+
+        public static DateTime ParseDateFromText(string text, DateTime onlyUsedForTests)
+        {
+            DateTime parsedDateTime;
+            // regexes used to determine which type of date we need to parse
+            var slashDashRegex = new Regex(@"[0-9]?[0-9][/\-. ][0-9]{1,2}([/\-. ][0-9]{4})?");
+            // create a regex string for each month and day of the week
+            string monthsList = Utils.JoinEnum(typeof(Months), " ?| ?");
+            var dayOfMonthRegex = new Regex($"(?i)[0-9]{{1,2}}(?=(th|rd|st|nd))|( ?({monthsList}) ?[0-9]{{1,2}})(?-i)");
+            string daysList = Utils.JoinEnum(typeof(DaysOfWeek), "|");
+            var thisWeekDayRegex = new Regex($"(?i)this {daysList}(?-i)");
+            var nextWeekDayRegex = new Regex($"(?i)next {daysList}(?-i)");
+            // relative dates
+            var relativeDateRegex = new Regex("(?i)from (now|today|this day)(?-i)");
+
+            // check each regex and determine which method to call based on the type
+            if (slashDashRegex.IsMatch(text))
+            {
+                parsedDateTime = ParseSlashOrDashNotation(text, onlyUsedForTests);
+            }
+            else if (dayOfMonthRegex.IsMatch(text))
+            {
+                parsedDateTime = ParseExactDate(text, onlyUsedForTests);
+            }
+            else if (thisWeekDayRegex.IsMatch(text))
+            {
+                parsedDateTime = GetDateForThisWeekDay(ParseWeekDayFromString(text), onlyUsedForTests);
+            }
+            else if (nextWeekDayRegex.IsMatch(text))
+            {
+                parsedDateTime = GetDateForNextWeekDay(ParseWeekDayFromString(text), onlyUsedForTests);
+            }
+            else if (relativeDateRegex.IsMatch(text))
+            {
+                parsedDateTime = GetDateForRelativeOffset(text, onlyUsedForTests);
+            }
+            else
+            {
+                throw new DateParseException($"Failed to parse general date! [{text}]");
+            }
+
+            return parsedDateTime;
+        }
+
+        public static DateTime ParseDateFromText(string text)
+        {
+            return ParseDateFromText(text, DateTime.Now);
         }
 
         public static DateTime ParseExactDate(string text)
@@ -314,6 +384,34 @@ namespace Capstone.Common
         }
 
         /// <summary>
+        /// parses the first occurrence of a time-like structure from the passed text and returns it as a <see cref="DateTime"/>
+        /// </summary>
+        /// <param name="text">the string to find and parse the time from</param>
+        /// <returns>the parsed time</returns>
+        /// <exception cref="FormatException">if the time cannot be parsed due to an error in the numbers (e.g. 23:61 isn't a valid time but can determined as the time-like structure since it's shaped like the time)</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="text"/> is null</exception>
+        public static DateTime ParseTimeFromString(string text)
+        {
+            return ParseTimeFromString(text, DateTime.Now);
+        }
+
+        public static DateTime ParseTimeFromString(string text, DateTime onlyUsedForTests)
+        {
+            var now = onlyUsedForTests;
+            // get the formatted time from the text
+            string timePart = GetTimePartOfString(text);
+            string formattedTimePart = FormatTime(timePart);
+            var parsedTime = DateTime.Parse(formattedTimePart);
+            var parsedDate = onlyUsedForTests.Date + parsedTime.TimeOfDay;
+            // make sure that the parsedTime hasn't happened yet. If it has, add 12 hours to the next instance of that time
+            if (now.TimeOfDay >= parsedTime.TimeOfDay)
+            {
+                parsedDate = parsedDate.AddHours(12);
+            }
+            return parsedDate;
+        }
+
+        /// <summary>
         /// scans the pased text for one of the days of the week and returns which <see cref="System.DayOfWeek"/> matches the string. The check is case-insensitive.
         /// <br />
         /// If no day of week was matched, a <see cref="DateParseException"/> will be thrown
@@ -355,6 +453,52 @@ namespace Capstone.Common
                 default:
                     throw new DateParseException($"The string [{text}] does not contain a day of the week!");
             }
+        }
+
+        public static string ReplaceDaytimeNamesWithTimeValue(string text)
+        {
+            text = text.ToLower().Replace("after noon", "afternoon");
+            // create a regex to match where the daytime words should be
+            var regex = new Regex(@"(?i)(?<=(in the |at |during the |monday |tuesday |wednesday |thursday |friday |saturday |sunday |tomorrow ))[a-zA-Z]{3,}(?-i)");
+            // make sure that "after noon" gets scrunched down to "afternoon" for the regex to work
+            while (regex.IsMatch(text))
+            {
+                var match = regex.Match(text);
+                var value = match.Value.ToLower();
+                var startIndex = match.Index;
+                var length = match.Length;
+                // split the string based on the match index and length
+                string[] splitText = { text.Substring(0, startIndex), text.Substring(startIndex + length) };
+                // find the matching time value
+                string replacedTimeValue = "";
+                switch (value.ToLower())
+                {
+                    case "morning":
+                        replacedTimeValue = MORNING;
+                        break;
+                    case "noon":
+                        replacedTimeValue = NOON;
+                        break;
+                    case "afternoon":
+                        replacedTimeValue = AFTERNOON;
+                        break;
+                    case "day":
+                        replacedTimeValue = DAY;
+                        break;
+                    case "evening":
+                        replacedTimeValue = EVENING;
+                        break;
+                    case "night":
+                        replacedTimeValue = NIGHT;
+                        break;
+                    case "midnight":
+                        replacedTimeValue = MIDNIGHT;
+                        break;
+                }
+                // squish the string together with the replaced time
+                text = splitText[0] + replacedTimeValue + splitText[1];
+            }
+            return text;
         }
 
         private static int FindFirstIndexOfMonth(string text, Months month)

@@ -176,5 +176,75 @@ namespace UnitTests
             Assert.AreEqual("23:59", DateTimeParser.FormatTime("23 59"));
         }
 
+        [TestMethod]
+        public void TestParseTimeFromStringCorrectlyParsesTime()
+        {
+            var inputString = "set an alarm for 7";
+            var startingDate = new DateTime(2020, 1, 1, 0, 0, 0);
+            var expectedDate = new DateTime(2020, 1, 1, 7, 0, 0);
+            var actualDate = DateTimeParser.ParseTimeFromString(inputString, startingDate);
+            Assert.AreEqual(expectedDate, actualDate);
+        }
+
+        [TestMethod]
+        public void TestParseTimeFromStringAdds12HoursIfTimeHasPassed()
+        {
+            var inputString = "set an alarm for 7";
+            var startingDate = new DateTime(2020, 1, 1, 7, 0, 0);
+            var expectedDate = new DateTime(2020, 1, 1, 19, 0, 0);
+            var actualDate = DateTimeParser.ParseTimeFromString(inputString, startingDate);
+            Assert.AreEqual(expectedDate, actualDate);
+        }
+
+        [TestMethod]
+        public void TestReplaceDaytimeNamesWithTimeValueProperlyReplacesTimeName()
+        {
+            var inputString = "set an alarm for Monday MoRning.";
+            var expectedValue = $"set an alarm for monday {DateTimeParser.MORNING}.";
+            var actualValue = DateTimeParser.ReplaceDaytimeNamesWithTimeValue(inputString);
+            Assert.AreEqual(expectedValue, actualValue);
+        }
+
+        [TestMethod]
+        public void TestReplaceDaytimeNamesWithTimeValueWorksOnAllOccurrences()
+        {
+            var inputString = "Monday Night and Tuesday Evening and wednesday in the after noon";
+            var expectedValue = $"monday {DateTimeParser.NIGHT} and tuesday {DateTimeParser.EVENING} and wednesday in the {DateTimeParser.AFTERNOON}";
+            var actualValue = DateTimeParser.ReplaceDaytimeNamesWithTimeValue(inputString);
+            Assert.AreEqual(expectedValue, actualValue);
+        }
+
+        [TestMethod]
+        public void TestParseDateFromTextProperlyParsesSpecificDates()
+        {
+            var now = new DateTime(2020, 1, 1);
+            // slash dash stuff
+            var slashDashNotation = "set an alarm for 4/1";
+            var slashDashExpectedDate = new DateTime(2020, 4, 1);
+            var slashDashActualDate = DateTimeParser.ParseDateFromText(slashDashNotation, now);
+            // specific date stuff
+            var specificDateNotation = "set an alarm for the 1st of May";
+            var specificDateExpectedDate = new DateTime(2020, 5, 1);
+            var specificDateActualDate = DateTimeParser.ParseDateFromText(specificDateNotation, now);
+            // "this" weekday dates
+            var thisWeekDayNotaion = "set an alarm for this saturday at 11:30 pm";
+            var thisWeekDayExpectedDate = new DateTime(2020, 1, 4);
+            var thisWeekDayActualDate = DateTimeParser.ParseDateFromText(thisWeekDayNotaion, now);
+            // "next" weekday dates
+            var nextWeekDayNotaion = "set an alarm for next saturday at 11:30 pm";
+            var nextWeekDayExpectedDate = new DateTime(2020, 1, 4);
+            var nextWeekDayActualDate = DateTimeParser.ParseDateFromText(nextWeekDayNotaion, now);
+            // relative dates (not times)
+            var relativeDateNotation = "set an alarm for 4 days from now at 12";
+            var relativeDateExpectedDate = new DateTime(2020, 1, 5);
+            var relativeDateActualDate = DateTimeParser.ParseDateFromText(relativeDateNotation, now);
+
+            // test the expected dates vs the actual dates
+            Assert.AreEqual(slashDashExpectedDate, slashDashActualDate);
+            Assert.AreEqual(specificDateExpectedDate, specificDateExpectedDate);
+            Assert.AreEqual(thisWeekDayExpectedDate, thisWeekDayActualDate);
+            Assert.AreEqual(nextWeekDayExpectedDate, nextWeekDayActualDate);
+            Assert.AreEqual(relativeDateExpectedDate, relativeDateActualDate);
+        }
     }
 }
