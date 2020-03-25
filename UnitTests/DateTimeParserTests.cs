@@ -167,5 +167,13 @@ namespace UnitTests
             Assert.AreEqual("0000", DateTimeParser.GetTimePartOfString("0000"));
             Assert.AreEqual("5pm", DateTimeParser.GetTimePartOfString("set an alarm for 5pm on November 12"));
         }
+
+        [TestMethod]
+        public void TestFormatTimeFormatsTimeProperlyDependingOnNumberOfDigits()
+        {
+            Assert.AreEqual("7:45", DateTimeParser.FormatTime("745"));
+            Assert.AreEqual("7:00 am", DateTimeParser.FormatTime("7 Am"));
+            Assert.AreEqual("23:59", DateTimeParser.FormatTime("23 59"));
+        }
     }
 }

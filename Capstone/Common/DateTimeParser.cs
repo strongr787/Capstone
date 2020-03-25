@@ -264,6 +264,52 @@ namespace Capstone.Common
             return timePart;
         }
 
+        /// <summary>
+        /// Formats a time-like piece of string to be in a parseable format by <see cref="DateTime.Parse(string)"/>
+        /// The rules for parsing are as follows:
+        /// <list type="bullet">
+        /// <item>If the time has 1 or 2 digits, those digits are used as the hour and 00 is set as the minutes</item>
+        /// <item>If the time has exactly 3 digits, the first digit is used as the hour and the other 2 are used as the minutes</item>
+        /// <item>If the time has exactly 4 digits, the first 2 digits are used as the hour and the other 2 are used as the minutes</item>
+        /// <item>if the original time has either am/pm in it, am/pm will be added to the end of the time respectively</item>
+        /// </list>
+        /// This method does not validate that the time is ok, only that it's formatted correctly
+        /// </summary>
+        /// <param name="time">The time-like string to be properly formatted</param>
+        /// <returns></returns>
+        public static string FormatTime(string time)
+        {
+            // a copy of the passed time so that we don't screw up the original for later
+            var cleanRegex = new Regex("(am|pm)|[ :]");
+            string timeCopy = cleanRegex.Replace(time.ToLower(), "");
+            // the length of the string changes where we need to insert characters
+            if (timeCopy.Length == 1 || timeCopy.Length == 2)
+            {
+                // it's the hour; need to add ":00"
+                timeCopy += ":00";
+            }
+            else if (timeCopy.Length == 3)
+            {
+                // full time with a single-digit hour; add a colon after the first character
+                timeCopy = timeCopy.Substring(0, 1) + ":" + timeCopy.Substring(1);
+            }
+            else if (timeCopy.Length == 4)
+            {
+                // full time with a double-digit hour; add a colon after the second character
+                timeCopy = timeCopy.Substring(0, 2) + ":" + timeCopy.Substring(2);
+            }
+            // re-add the am/pm if the original time has it
+            if (time.ToLower().Contains("am"))
+            {
+                timeCopy += " am";
+            }
+            else if (time.ToLower().Contains("pm"))
+            {
+                timeCopy += " pm";
+            }
+            return timeCopy;
+        }
+
         private static Units ParseUnitFromText(string text)
         {
             Units parsedUnit = Units.NONE;
