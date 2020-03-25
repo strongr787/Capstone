@@ -175,5 +175,6 @@ namespace UnitTests
             Assert.AreEqual("7:00 am", DateTimeParser.FormatTime("7 Am"));
             Assert.AreEqual("23:59", DateTimeParser.FormatTime("23 59"));
         }
+
     }
 }

@@ -6,48 +6,97 @@ namespace Capstone.Common
 {
     public static class DateTimeParser
     {
-        /// <summary>
-        /// scans the pased text for one of the days of the week and returns which <see cref="System.DayOfWeek"/> matches the string. The check is case-insensitive.
-        /// <br />
-        /// If no day of week was matched, a <see cref="DateParseException"/> will be thrown
-        /// </summary>
-        /// <param name="text">the text to check</param>
-        /// <returns>the matching day of week.</returns>
-        /// <exception cref="DateParseException" />
-        public static System.DayOfWeek ParseWeekDayFromString(string text)
+        private enum DaysOfWeek
         {
-            text = text.ToLower();
-            DaysOfWeek matchedDay = DaysOfWeek.NONE;
-            var dayOfWeekList = Enum.GetValues(typeof(DaysOfWeek));
-            foreach (DaysOfWeek day in dayOfWeekList)
+            // used to determine if there's an error
+            NONE = -1,
+            SUNDAY = DayOfWeek.Sunday,
+            MONDAY = DayOfWeek.Monday,
+            TUESDAY = DayOfWeek.Tuesday,
+            WEDNESDAY = DayOfWeek.Wednesday,
+            THURSDAY = DayOfWeek.Thursday,
+            FRIDAY = DayOfWeek.Friday,
+            SATURDAY = DayOfWeek.Saturday
+        }
+
+        private enum Months
+        {
+            // used to indicate an error
+            NONE = -1,
+            JANUARY = 1,
+            FEBRUARY = 2,
+            MARCH = 3,
+            APRIL = 4,
+            MAY = 5,
+            JUNE = 6,
+            JULY = 7,
+            AUGUST = 8,
+            SEPTEMBER = 9,
+            OCTOBER = 10,
+            NOVEMBER = 11,
+            DECEMBER = 12
+        }
+
+        /// <summary>
+        /// Represents supported units of time for this parser class
+        /// </summary>
+        private enum Units
+        {
+            // used to represent an error
+            NONE = -1,
+            SECOND = 0,
+            MINUTE = 1,
+            HOUR = 2,
+            DAY = 3,
+            WEEK = 4,
+            MONTH = 5,
+            YEAR = 6
+        }
+
+        /// <summary>
+        /// Formats a time-like piece of string to be in a parseable format by <see cref="DateTime.Parse(string)"/>
+        /// The rules for parsing are as follows:
+        /// <list type="bullet">
+        /// <item>If the time has 1 or 2 digits, those digits are used as the hour and 00 is set as the minutes</item>
+        /// <item>If the time has exactly 3 digits, the first digit is used as the hour and the other 2 are used as the minutes</item>
+        /// <item>If the time has exactly 4 digits, the first 2 digits are used as the hour and the other 2 are used as the minutes</item>
+        /// <item>if the original time has either am/pm in it, am/pm will be added to the end of the time respectively</item>
+        /// </list>
+        /// This method does not validate that the time is ok, only that it's formatted correctly
+        /// </summary>
+        /// <param name="time">The time-like string to be properly formatted</param>
+        /// <returns></returns>
+        public static string FormatTime(string time)
+        {
+            // a copy of the passed time so that we don't screw up the original for later
+            var cleanRegex = new Regex("(am|pm)|[ :]");
+            string timeCopy = cleanRegex.Replace(time.ToLower(), "");
+            // the length of the string changes where we need to insert characters
+            if (timeCopy.Length == 1 || timeCopy.Length == 2)
             {
-                string dayName = day.ToString().ToLower();
-                if (text.Contains(dayName))
-                {
-                    matchedDay = day;
-                }
+                // it's the hour; need to add ":00"
+                timeCopy += ":00";
             }
-            // figure out which System.DayOfWeek to return
-            switch (matchedDay)
+            else if (timeCopy.Length == 3)
             {
-                case DaysOfWeek.SUNDAY:
-                    return DayOfWeek.Sunday;
-                case DaysOfWeek.MONDAY:
-                    return DayOfWeek.Monday;
-                case DaysOfWeek.TUESDAY:
-                    return DayOfWeek.Tuesday;
-                case DaysOfWeek.WEDNESDAY:
-                    return DayOfWeek.Wednesday;
-                case DaysOfWeek.THURSDAY:
-                    return DayOfWeek.Thursday;
-                case DaysOfWeek.FRIDAY:
-                    return DayOfWeek.Friday;
-                case DaysOfWeek.SATURDAY:
-                    return DayOfWeek.Saturday;
-                case DaysOfWeek.NONE:
-                default:
-                    throw new DateParseException($"The string [{text}] does not contain a day of the week!");
+                // full time with a single-digit hour; add a colon after the first character
+                timeCopy = timeCopy.Substring(0, 1) + ":" + timeCopy.Substring(1);
             }
+            else if (timeCopy.Length == 4)
+            {
+                // full time with a double-digit hour; add a colon after the second character
+                timeCopy = timeCopy.Substring(0, 2) + ":" + timeCopy.Substring(2);
+            }
+            // re-add the am/pm if the original time has it
+            if (time.ToLower().Contains("am"))
+            {
+                timeCopy += " am";
+            }
+            else if (time.ToLower().Contains("pm"))
+            {
+                timeCopy += " pm";
+            }
+            return timeCopy;
         }
 
         /// <summary>
@@ -65,6 +114,64 @@ namespace Capstone.Common
             // create a new DateTime from the passed date so that we don't modify the passed date
             DateTime newDate = new DateTime(date.Ticks).AddDays(numberOfDaysUntilNextDay);
             return newDate;
+        }
+
+        /// <summary>
+        /// Gets a date from the passed text that contains a relative date (e.g. "set an alarm for 5 days from now") and returns it
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="onlyUsedForTests">the date used as the starting point to create the returned date from</param>
+        /// <returns></returns>
+        /// <exception cref="DateParseException" />
+        public static DateTime GetDateForRelativeOffset(string text, DateTime onlyUsedForTests)
+        {
+            DateTime offsetDateTime;
+            var now = onlyUsedForTests;
+            Units specifiedUnit = ParseUnitFromText(text);
+            if (specifiedUnit == Units.NONE)
+            {
+                throw new DateParseException($"could not find a unit in the passed string [{text}]");
+            }
+            // create a regex to parse out the number before the returned unit
+            var regexString = $"(?i)[0-9]{{1,3}}(?= {specifiedUnit.ToString()})(?-i)";
+            var regex = new Regex(regexString);
+            var match = regex.Match(text);
+            if (match.Success)
+            {
+                int parsedNumber = int.Parse(match.Value);
+                // figure out which unit to increment
+                switch (specifiedUnit)
+                {
+                    case Units.SECOND:
+                        offsetDateTime = now.AddSeconds(parsedNumber);
+                        break;
+                    case Units.MINUTE:
+                        offsetDateTime = now.AddMinutes(parsedNumber);
+                        break;
+                    case Units.HOUR:
+                        offsetDateTime = now.AddHours(parsedNumber);
+                        break;
+                    case Units.DAY:
+                        offsetDateTime = now.AddDays(parsedNumber);
+                        break;
+                    case Units.WEEK:
+                        offsetDateTime = now.AddDays(7 * parsedNumber);
+                        break;
+                    case Units.MONTH:
+                        offsetDateTime = now.AddMonths(parsedNumber);
+                        break;
+                    case Units.YEAR:
+                        offsetDateTime = now.AddYears(parsedNumber);
+                        break;
+                    default:
+                        throw new DateParseException("Something went wrong with adding the unit to the date");
+                }
+            }
+            else
+            {
+                throw new DateParseException($"could not find number of unit for text [{text}]");
+            }
+            return offsetDateTime;
         }
 
         /// <summary>
@@ -88,6 +195,39 @@ namespace Capstone.Common
             // create a new DateTime from the passed date so that we don't modify the passed date
             DateTime newDate = new DateTime(date.Ticks).AddDays(numberOfDaysUntilNextDay);
             return newDate;
+        }
+
+        public static DateTime GetNextOccurrenceOfDate(int day, int month, DateTime onlyUsedForTests)
+        {
+            var now = onlyUsedForTests;
+            var year = (int)month < now.Month || (int)month == now.Month && day < now.Day ? now.Year + 1 : now.Year;
+            return new DateTime(year, month, day);
+        }
+
+        /// <summary>
+        /// Finds the first instance of text in the string that matches a time-like format. Examples of this format are:
+        /// <list type="bullet">
+        /// <item>7 am</item>
+        /// <item>7:30 pm</item>
+        /// <item>2359</item>
+        /// <item>19 o'clock</item>
+        /// </list>
+        /// This method does not ensure that the time is in proper format to be parsed by <see cref="System.DateTime.Parse(string)"/>
+        /// </summary>
+        /// <param name="text">the string to find a time-like structure in</param>
+        /// <returns>the found time if it was found, else an empty string</returns>
+        public static string GetTimePartOfString(string text)
+        {
+            string timePart = "";
+            text = text.ToLower();
+            // use a regex to parse out the time. This regex can handle partial times, full times, am, pm, and o'clock formats.
+            var timeRegex = new Regex("([0-2]?[0-9][: ]?[0-5][0-9]( ?[ap]m)?)|([0-9]{1,4} ?[ap]m)|([0-9]{1,2}(?=( ?)o([' -]?)clock))|([0-9]{1,4}$|[0-9]{1,2}[: ][0-9]{1,2}$)");
+            var match = timeRegex.Match(text);
+            if (match.Success)
+            {
+                timePart = match.Value;
+            }
+            return timePart;
         }
 
         public static DateTime ParseExactDate(string text)
@@ -173,185 +313,48 @@ namespace Capstone.Common
             return parsedDate;
         }
 
-        public static DateTime GetNextOccurrenceOfDate(int day, int month, DateTime onlyUsedForTests)
-        {
-            var now = onlyUsedForTests;
-            var year = (int)month < now.Month || (int)month == now.Month && day < now.Day ? now.Year + 1 : now.Year;
-            return new DateTime(year, month, day);
-        }
-
         /// <summary>
-        /// Gets a date from the passed text that contains a relative date (e.g. "set an alarm for 5 days from now") and returns it
+        /// scans the pased text for one of the days of the week and returns which <see cref="System.DayOfWeek"/> matches the string. The check is case-insensitive.
+        /// <br />
+        /// If no day of week was matched, a <see cref="DateParseException"/> will be thrown
         /// </summary>
-        /// <param name="text"></param>
-        /// <param name="onlyUsedForTests">the date used as the starting point to create the returned date from</param>
-        /// <returns></returns>
+        /// <param name="text">the text to check</param>
+        /// <returns>the matching day of week.</returns>
         /// <exception cref="DateParseException" />
-        public static DateTime GetDateForRelativeOffset(string text, DateTime onlyUsedForTests)
+        public static System.DayOfWeek ParseWeekDayFromString(string text)
         {
-            DateTime offsetDateTime;
-            var now = onlyUsedForTests;
-            Units specifiedUnit = ParseUnitFromText(text);
-            if (specifiedUnit == Units.NONE)
-            {
-                throw new DateParseException($"could not find a unit in the passed string [{text}]");
-            }
-            // create a regex to parse out the number before the returned unit
-            var regexString = $"(?i)[0-9]{{1,3}}(?= {specifiedUnit.ToString()})(?-i)";
-            var regex = new Regex(regexString);
-            var match = regex.Match(text);
-            if (match.Success)
-            {
-                int parsedNumber = int.Parse(match.Value);
-                // figure out which unit to increment
-                switch (specifiedUnit)
-                {
-                    case Units.SECOND:
-                        offsetDateTime = now.AddSeconds(parsedNumber);
-                        break;
-                    case Units.MINUTE:
-                        offsetDateTime = now.AddMinutes(parsedNumber);
-                        break;
-                    case Units.HOUR:
-                        offsetDateTime = now.AddHours(parsedNumber);
-                        break;
-                    case Units.DAY:
-                        offsetDateTime = now.AddDays(parsedNumber);
-                        break;
-                    case Units.WEEK:
-                        offsetDateTime = now.AddDays(7 * parsedNumber);
-                        break;
-                    case Units.MONTH:
-                        offsetDateTime = now.AddMonths(parsedNumber);
-                        break;
-                    case Units.YEAR:
-                        offsetDateTime = now.AddYears(parsedNumber);
-                        break;
-                    default:
-                        throw new DateParseException("Something went wrong with adding the unit to the date");
-                }
-            }
-            else
-            {
-                throw new DateParseException($"could not find number of unit for text [{text}]");
-            }
-            return offsetDateTime;
-        }
-
-        /// <summary>
-        /// Finds the first instance of text in the string that matches a time-like format. Examples of this format are:
-        /// <list type="bullet">
-        /// <item>7 am</item>
-        /// <item>7:30 pm</item>
-        /// <item>2359</item>
-        /// <item>19 o'clock</item>
-        /// </list>
-        /// This method does not ensure that the time is in proper format to be parsed by <see cref="System.DateTime.Parse(string)"/>
-        /// </summary>
-        /// <param name="text">the string to find a time-like structure in</param>
-        /// <returns>the found time if it was found, else an empty string</returns>
-        public static string GetTimePartOfString(string text)
-        {
-            string timePart = "";
             text = text.ToLower();
-            // use a regex to parse out the time. This regex can handle partial times, full times, am, pm, and o'clock formats.
-            var timeRegex = new Regex("([0-2]?[0-9][: ]?[0-5][0-9]( ?[ap]m)?)|([0-9]{1,4} ?[ap]m)|([0-9]{1,2}(?=( ?)o([' -]?)clock))|([0-9]{1,4}$|[0-9]{1,2}[: ][0-9]{1,2}$)");
-            var match = timeRegex.Match(text);
-            if (match.Success)
+            DaysOfWeek matchedDay = DaysOfWeek.NONE;
+            var dayOfWeekList = Enum.GetValues(typeof(DaysOfWeek));
+            foreach (DaysOfWeek day in dayOfWeekList)
             {
-                timePart = match.Value;
-            }
-            return timePart;
-        }
-
-        /// <summary>
-        /// Formats a time-like piece of string to be in a parseable format by <see cref="DateTime.Parse(string)"/>
-        /// The rules for parsing are as follows:
-        /// <list type="bullet">
-        /// <item>If the time has 1 or 2 digits, those digits are used as the hour and 00 is set as the minutes</item>
-        /// <item>If the time has exactly 3 digits, the first digit is used as the hour and the other 2 are used as the minutes</item>
-        /// <item>If the time has exactly 4 digits, the first 2 digits are used as the hour and the other 2 are used as the minutes</item>
-        /// <item>if the original time has either am/pm in it, am/pm will be added to the end of the time respectively</item>
-        /// </list>
-        /// This method does not validate that the time is ok, only that it's formatted correctly
-        /// </summary>
-        /// <param name="time">The time-like string to be properly formatted</param>
-        /// <returns></returns>
-        public static string FormatTime(string time)
-        {
-            // a copy of the passed time so that we don't screw up the original for later
-            var cleanRegex = new Regex("(am|pm)|[ :]");
-            string timeCopy = cleanRegex.Replace(time.ToLower(), "");
-            // the length of the string changes where we need to insert characters
-            if (timeCopy.Length == 1 || timeCopy.Length == 2)
-            {
-                // it's the hour; need to add ":00"
-                timeCopy += ":00";
-            }
-            else if (timeCopy.Length == 3)
-            {
-                // full time with a single-digit hour; add a colon after the first character
-                timeCopy = timeCopy.Substring(0, 1) + ":" + timeCopy.Substring(1);
-            }
-            else if (timeCopy.Length == 4)
-            {
-                // full time with a double-digit hour; add a colon after the second character
-                timeCopy = timeCopy.Substring(0, 2) + ":" + timeCopy.Substring(2);
-            }
-            // re-add the am/pm if the original time has it
-            if (time.ToLower().Contains("am"))
-            {
-                timeCopy += " am";
-            }
-            else if (time.ToLower().Contains("pm"))
-            {
-                timeCopy += " pm";
-            }
-            return timeCopy;
-        }
-
-        private static Units ParseUnitFromText(string text)
-        {
-            Units parsedUnit = Units.NONE;
-            var unitsArray = Enum.GetValues(typeof(Units));
-            foreach (Units unit in unitsArray)
-            {
-                var lowercaseUnit = unit.ToString().ToLower();
-                if (text.ToLower().Contains(lowercaseUnit))
+                string dayName = day.ToString().ToLower();
+                if (text.Contains(dayName))
                 {
-                    parsedUnit = unit;
-                    break;
+                    matchedDay = day;
                 }
             }
-            return parsedUnit;
-        }
-
-        /// <summary>
-        /// takes a piece of text and replaces all references of full month names with their numeric counterparts (e.g. January becomes 1, and December becomes 12). The replacing is done ignoring case.
-        /// </summary>
-        /// <param name="text">the text to have all month occurrences replaced in</param>
-        /// <returns></returns>
-        private static DateTime GetNextOccurrenceOfDate(int day, int month)
-        {
-            return GetNextOccurrenceOfDate(day, month, DateTime.Now);
-        }
-
-        private static string ReplaceMonthNamesWithMonthNumber(string text)
-        {
-            string result = text;
-            // for each month, create a case-insensitive regex for it and use it to replace the text
-            var months = Enum.GetValues(typeof(Months));
-            foreach (Months month in months)
+            // figure out which System.DayOfWeek to return
+            switch (matchedDay)
             {
-                var monthRegex = new Regex($"(?i){month.ToString()}(?-i)");
-                result = monthRegex.Replace(result, ((int)month).ToString());
+                case DaysOfWeek.SUNDAY:
+                    return DayOfWeek.Sunday;
+                case DaysOfWeek.MONDAY:
+                    return DayOfWeek.Monday;
+                case DaysOfWeek.TUESDAY:
+                    return DayOfWeek.Tuesday;
+                case DaysOfWeek.WEDNESDAY:
+                    return DayOfWeek.Wednesday;
+                case DaysOfWeek.THURSDAY:
+                    return DayOfWeek.Thursday;
+                case DaysOfWeek.FRIDAY:
+                    return DayOfWeek.Friday;
+                case DaysOfWeek.SATURDAY:
+                    return DayOfWeek.Saturday;
+                case DaysOfWeek.NONE:
+                default:
+                    throw new DateParseException($"The string [{text}] does not contain a day of the week!");
             }
-            return result;
-        }
-
-        private static DateTime GetDateForNextWeekDay(System.DayOfWeek nextDay)
-        {
-            return GetDateForNextWeekDay(nextDay, DateTime.Now);
         }
 
         private static int FindFirstIndexOfMonth(string text, Months month)
@@ -359,6 +362,16 @@ namespace Capstone.Common
             text = text.ToLower();
             int matchingIndex = text.ToLower().IndexOf(month.ToString().ToLower());
             return matchingIndex;
+        }
+
+        private static DateTime GetDateForNextWeekDay(System.DayOfWeek nextDay)
+        {
+            return GetDateForNextWeekDay(nextDay, DateTime.Now);
+        }
+
+        private static DateTime GetDateForRelativeOffset(string text)
+        {
+            return GetDateForRelativeOffset(text, DateTime.Now);
         }
 
         private static Months GetMonthFromString(string text)
@@ -378,56 +391,42 @@ namespace Capstone.Common
             return foundMonth;
         }
 
-        private static DateTime GetDateForRelativeOffset(string text)
-        {
-            return GetDateForRelativeOffset(text, DateTime.Now);
-        }
-
-        private enum DaysOfWeek
-        {
-            // used to determine if there's an error
-            NONE = -1,
-            SUNDAY = DayOfWeek.Sunday,
-            MONDAY = DayOfWeek.Monday,
-            TUESDAY = DayOfWeek.Tuesday,
-            WEDNESDAY = DayOfWeek.Wednesday,
-            THURSDAY = DayOfWeek.Thursday,
-            FRIDAY = DayOfWeek.Friday,
-            SATURDAY = DayOfWeek.Saturday
-        }
-
-        private enum Months
-        {
-            // used to indicate an error
-            NONE = -1,
-            JANUARY = 1,
-            FEBRUARY = 2,
-            MARCH = 3,
-            APRIL = 4,
-            MAY = 5,
-            JUNE = 6,
-            JULY = 7,
-            AUGUST = 8,
-            SEPTEMBER = 9,
-            OCTOBER = 10,
-            NOVEMBER = 11,
-            DECEMBER = 12
-        }
-
         /// <summary>
-        /// Represents supported units of time for this parser class
+        /// takes a piece of text and replaces all references of full month names with their numeric counterparts (e.g. January becomes 1, and December becomes 12). The replacing is done ignoring case.
         /// </summary>
-        private enum Units
+        /// <param name="text">the text to have all month occurrences replaced in</param>
+        /// <returns></returns>
+        private static DateTime GetNextOccurrenceOfDate(int day, int month)
         {
-            // used to represent an error
-            NONE = -1,
-            SECOND = 0,
-            MINUTE = 1,
-            HOUR = 2,
-            DAY = 3,
-            WEEK = 4,
-            MONTH = 5,
-            YEAR = 6
+            return GetNextOccurrenceOfDate(day, month, DateTime.Now);
+        }
+
+        private static Units ParseUnitFromText(string text)
+        {
+            Units parsedUnit = Units.NONE;
+            var unitsArray = Enum.GetValues(typeof(Units));
+            foreach (Units unit in unitsArray)
+            {
+                var lowercaseUnit = unit.ToString().ToLower();
+                if (text.ToLower().Contains(lowercaseUnit))
+                {
+                    parsedUnit = unit;
+                    break;
+                }
+            }
+            return parsedUnit;
+        }
+        private static string ReplaceMonthNamesWithMonthNumber(string text)
+        {
+            string result = text;
+            // for each month, create a case-insensitive regex for it and use it to replace the text
+            var months = Enum.GetValues(typeof(Months));
+            foreach (Months month in months)
+            {
+                var monthRegex = new Regex($"(?i){month.ToString()}(?-i)");
+                result = monthRegex.Replace(result, ((int)month).ToString());
+            }
+            return result;
         }
     }
 
