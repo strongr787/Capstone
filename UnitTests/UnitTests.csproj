@@ -121,7 +121,7 @@
   <ItemGroup>
     <Compile Include="ActionRouterTests.cs" />
     <Compile Include="AlarmsFormPageTests.cs" />
-    <Compile Include="DateParserTests.cs" />
+    <Compile Include="DateTimeParserTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RemindersFormPageTests.cs" />
     <Compile Include="SSMLBuilderTests.cs" />

@@ -5,12 +5,12 @@ using System;
 namespace UnitTests
 {
     [TestClass]
-    public class DateParserTests
+    public class DateTimeParserTests
     {
         [TestMethod]
         public void TestParseWeekDayFromStringFindsCorrectDay()
         {
-            Assert.AreEqual(DayOfWeek.Wednesday, DateParser.ParseWeekDayFromString("The day of the week is WednesDay"));
+            Assert.AreEqual(DayOfWeek.Wednesday, DateTimeParser.ParseWeekDayFromString("The day of the week is WednesDay"));
         }
 
         [TestMethod]
@@ -18,7 +18,7 @@ namespace UnitTests
         {
             try
             {
-                DateParser.ParseWeekDayFromString("The day of the week is");
+                DateTimeParser.ParseWeekDayFromString("The day of the week is");
             }
             catch (DateParseException)
             {
@@ -38,7 +38,7 @@ namespace UnitTests
             var nextDay = DayOfWeek.Wednesday;
             // the date we're expecting is Wednesday, March 11th 2020
             var expectedDate = new DateTime(2020, 3, 11);
-            var actualDate = DateParser.GetDateForNextWeekDay(nextDay, today);
+            var actualDate = DateTimeParser.GetDateForNextWeekDay(nextDay, today);
             Assert.AreEqual(expectedDate, actualDate);
         }
 
@@ -50,7 +50,7 @@ namespace UnitTests
             var nextDay = DayOfWeek.Wednesday;
             // the date we're expecting is Wednesday, March 4th 2020
             var expectedDate = new DateTime(2020, 3, 4);
-            var actualDate = DateParser.GetDateForThisWeekDay(nextDay, today);
+            var actualDate = DateTimeParser.GetDateForThisWeekDay(nextDay, today);
             Assert.AreEqual(expectedDate, actualDate);
         }
 
@@ -60,8 +60,8 @@ namespace UnitTests
             var dayBeforeMonth = "set an alarm for the 05th of March";
             var dayAfterMonth = "add a reminder for october 22nd";
 
-            DateTime beforeMonthDate = DateParser.ParseExactDate(dayBeforeMonth);
-            DateTime afterMonthDate = DateParser.ParseExactDate(dayAfterMonth);
+            DateTime beforeMonthDate = DateTimeParser.ParseExactDate(dayBeforeMonth);
+            DateTime afterMonthDate = DateTimeParser.ParseExactDate(dayAfterMonth);
             // the expected values
             var expectedBeforeMonth = new DateTime(2020, 3, 5);
             var expectedAfterMonth = new DateTime(2020, 10, 22);
@@ -77,7 +77,7 @@ namespace UnitTests
         {
             try
             {
-                DateParser.ParseExactDate("");
+                DateTimeParser.ParseExactDate("");
             }
             catch (DateParseException)
             {
@@ -98,7 +98,7 @@ namespace UnitTests
             // another test handles the placement of the day, this one only needs to check for one day placement
             var input = "Set an alarm for the 1st of May";
             DateTime expectedDate = new DateTime(2021, 5, 1);
-            DateTime actualDate = DateParser.ParseExactDate(input, today);
+            DateTime actualDate = DateTimeParser.ParseExactDate(input, today);
             Assert.AreEqual(expectedDate, actualDate);
         }
 
@@ -109,7 +109,7 @@ namespace UnitTests
             var now = new DateTime(2020, 3, 19);
             var day = 18;
             var month = 3;
-            Assert.AreEqual(new DateTime(2021, month, day), DateParser.GetNextOccurrenceOfDate(day, month, now));
+            Assert.AreEqual(new DateTime(2021, month, day), DateTimeParser.GetNextOccurrenceOfDate(day, month, now));
         }
 
         [TestMethod]
@@ -118,7 +118,7 @@ namespace UnitTests
             var now = new DateTime(2020, 3, 19);
             var day = 20;
             var month = 3;
-            Assert.AreEqual(new DateTime(2020, month, day), DateParser.GetNextOccurrenceOfDate(day, month, now));
+            Assert.AreEqual(new DateTime(2020, month, day), DateTimeParser.GetNextOccurrenceOfDate(day, month, now));
         }
 
         [TestMethod]
@@ -126,7 +126,7 @@ namespace UnitTests
         {
             var input = "Set an alarm for 5/5/2020";
             var expectedDate = new DateTime(2020, 5, 5);
-            var actualDate = DateParser.ParseSlashOrDashNotation(input);
+            var actualDate = DateTimeParser.ParseSlashOrDashNotation(input);
 
             Assert.AreEqual(expectedDate, actualDate);
         }
@@ -138,8 +138,34 @@ namespace UnitTests
             // the date used for the starting point so that the test is stable
             var now = new DateTime(2020, 3, 19);
             var expectedDate = new DateTime(2020, 5, 5);
-            var actualDate = DateParser.ParseSlashOrDashNotation(input, now);
+            var actualDate = DateTimeParser.ParseSlashOrDashNotation(input, now);
             Assert.AreEqual(expectedDate, actualDate);
+        }
+
+        [TestMethod]
+        public void TestGetDateForRelativeOffsetReturnsCorrectlyOffsetDate()
+        {
+            var testDate = new DateTime(2020, 3, 22);
+            var inputString = "add a reminder for 3 weeks from now";
+            var expectedDate = new DateTime(2020, 4, 12);
+            var actualDate = DateTimeParser.GetDateForRelativeOffset(inputString, testDate);
+            Assert.AreEqual(expectedDate, actualDate);
+        }
+
+        [TestMethod]
+        public void TestGetTimePartOfStringFindsProperParts()
+        {
+            // test several different time formats
+            Assert.AreEqual("7", DateTimeParser.GetTimePartOfString("Set an alarm for 7"));
+            Assert.AreEqual("7:30", DateTimeParser.GetTimePartOfString("set an alarm for 7:30"));
+            Assert.AreEqual("7:30 pm", DateTimeParser.GetTimePartOfString("set an alarm for 7:30 pm called do unit tests"));
+            Assert.AreEqual("19", DateTimeParser.GetTimePartOfString("set an alarm for 19 o'clock"));
+            Assert.AreEqual("5 am", DateTimeParser.GetTimePartOfString("set an alarm called take the 3 youngest kids to school at 5 am"));
+            Assert.AreEqual("905 am", DateTimeParser.GetTimePartOfString("add a reminder for November 12th at 905 am"));
+            Assert.AreEqual("12:00", DateTimeParser.GetTimePartOfString("set an alarm at 12:00 called hi"));
+            Assert.AreEqual("2359 pm", DateTimeParser.GetTimePartOfString("2359 pm"));
+            Assert.AreEqual("0000", DateTimeParser.GetTimePartOfString("0000"));
+            Assert.AreEqual("5pm", DateTimeParser.GetTimePartOfString("set an alarm for 5pm on November 12"));
         }
     }
 }
