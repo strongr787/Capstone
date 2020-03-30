@@ -35,7 +35,7 @@ namespace Capstone.Common
         public static void CreateReminder(string Title, DateTime Time, DateTime Date)
         {
 
-            String strTime = Time.ToString("yyyy-MM-dd HH:mm");
+            String strTime = Time.ToString("HH:mm");
             String strDate = Date.ToString("yyyy-MM-dd HH:mm");
             SqliteConnection conn = OpenDatabase();
             conn.Open();
@@ -49,7 +49,7 @@ namespace Capstone.Common
         public static void UpdateReminder(int ID, string Title, DateTime Time, DateTime Date)
         {
             int intID = ID;
-            String strTime = Time.ToString("yyyy-MM-dd HH:mm");
+            String strTime = Time.ToString("HH:mm");
             String strDate = Date.ToString("yyyy-MM-dd HH:mm");
             SqliteConnection conn = OpenDatabase();
             conn.Open();
@@ -100,7 +100,7 @@ namespace Capstone.Common
         public static void CreateAlarm(string Title, DateTime Time, DateTime Date)
         {
 
-            String strTime = Time.ToString("yyyy-MM-dd HH:mm");
+            String strTime = Time.ToString("HH:mm");
             String strDate = Date.ToString("yyyy-MM-dd HH:mm");
             SqliteConnection conn = OpenDatabase();
             conn.Open();
@@ -114,7 +114,7 @@ namespace Capstone.Common
         public static void UpdateAlarm(int ID, string Title, DateTime Time, DateTime Date)
         {
             int intID = ID;
-            String strTime = Time.ToString("yyyy-MM-dd HH:mm");
+            String strTime = Time.ToString("HH:mm");
             String strDate = Date.ToString("yyyy-MM-dd HH:mm");
             SqliteConnection conn = OpenDatabase();
             conn.Open();
@@ -165,7 +165,7 @@ namespace Capstone.Common
         public static void CreateVoiceNote(string FileName, string DsiplayName, int RecordingDuration, string FilePath, DateTime RecordDate, DateTime RecordTime)
         {
 
-            String strRecordTime = RecordTime.ToString("yyyy-MM-dd HH:mm");
+            String strRecordTime = RecordTime.ToString("HH:mm");
             String strRecordDate = RecordDate.ToString("yyyy-MM-dd HH:mm");
             SqliteConnection conn = OpenDatabase();
             conn.Open();
