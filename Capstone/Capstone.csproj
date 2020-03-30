@@ -134,9 +134,11 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Common\DateTimeParser.cs" />
     <Compile Include="Common\StringUtils.cs" />
     <Compile Include="Common\TextToSpeechEngine.cs" />
     <Compile Include="Common\UIUtils.cs" />
+    <Compile Include="Common\Utils.cs" />
     <Compile Include="DataPrivacyTips.xaml.cs">
       <DependentUpon>DataPrivacyTips.xaml</DependentUpon>
     </Compile>
