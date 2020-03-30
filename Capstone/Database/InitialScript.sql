@@ -1,10 +1,32 @@
-CREATE TABLE IF NOT EXISTS "TSettings"
+DROP TABLE IF EXISTS "TSettings";
+DROP TABLE IF EXISTS "TSettingOptions";
+DROP TABLE IF EXISTS "TSearchEngines";
+DROP TABLE IF EXISTS "TSearchableWebsites";
+DROP TABLE IF EXISTS "TAlarms";
+DROP TABLE IF EXISTS "TAlarmDates";
+DROP TABLE IF EXISTS "TReminders";
+DROP TABLE IF EXISTS "TReminderDates";
+DROP TABLE IF EXISTS "TMapProviders";
+DROP TABLE IF EXISTS "TMapProvidersURLS";
+DROP TABLE IF EXISTS "TMapProviderAccessTypes";
+DROP TABLE IF EXISTS "TMapProvidersURLParts";
+DROP TABLE IF EXISTS "TVoiceMemos";
+DROP TABLE IF EXISTS "TUserInfos";
+DROP TABLE IF EXISTS "TCaches";
+DROP TABLE IF EXISTS "TBobResponses";
+DROP TABLE IF EXISTS "TBobResponseInputs";
+DROP TABLE IF EXISTS "TWeatherProviders";
+DROP TABLE IF EXISTS "TWeatherProviderURLS";
+DROP TABLE IF EXISTS "TWeatherProviderURLParts";
+DROP TABLE IF EXISTS "TWeatherProviderAccessTypes";
+
+CREATE TABLE "TSettings"
 (
 	 "settingID"			INTEGER PRIMARY KEY NOT NULL
 	,"settingDisplayName"	VARCHAR(255)	NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS "TSettingOptions"
+CREATE TABLE "TSettingOptions"
 (
 	 "settingOptionID"	    INTEGER 		PRIMARY KEY NOT NULL
 	,"optionDisplayName"    VARCHAR(255)	NOT NULL
@@ -13,7 +35,7 @@ CREATE TABLE IF NOT EXISTS "TSettingOptions"
     ,FOREIGN KEY ( settingID ) REFERENCES TSettings ( settingID )
 );
 
-CREATE TABLE IF NOT EXISTS "TSearchEngines"
+CREATE TABLE "TSearchEngines"
 (
 	 "searchEngineID"			INTEGER			PRIMARY KEY	NOT NULL
 	,"searchEngineName"			NVARCHAR(255)	NOT NULL
@@ -21,7 +43,7 @@ CREATE TABLE IF NOT EXISTS "TSearchEngines"
 	,"searchEngineQueryString"  NVARCHAR(255)	NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS "TSearchableWebsites"
+CREATE TABLE "TSearchableWebsites"
 (						
 	 "searchableWebsitesID"				INTEGER			PRIMARY KEY NOT NULL
 	,"searchableWebsiteName"			NVARCHAR(255)	NOT NULL
@@ -29,7 +51,7 @@ CREATE TABLE IF NOT EXISTS "TSearchableWebsites"
 	,"searchableWebsiteQueryString"	    NVARCHAR(255)	NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS "TAlarms"
+CREATE TABLE "TAlarms"
 (						
 	 "alarmID"	    INTEGER			PRIMARY KEY NOT NULL
 	,"alarmTime"    TIME			NOT NULL
@@ -37,7 +59,7 @@ CREATE TABLE IF NOT EXISTS "TAlarms"
 	,"isDeleted"    BIT				NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS "TAlarmDates"
+CREATE TABLE "TAlarmDates"
 (						
 	 "alarmDateID"  INTEGER			PRIMARY KEY NOT NULL
 	,"alarmID"	    INTEGER			NOT NULL
@@ -45,7 +67,7 @@ CREATE TABLE IF NOT EXISTS "TAlarmDates"
     ,FOREIGN KEY ( alarmID ) REFERENCES TAlarms ( alarmID )
 );
 
-CREATE TABLE IF NOT EXISTS "TReminders"
+CREATE TABLE "TReminders"
 (
 	 "reminderID"		INTEGER			PRIMARY KEY NOT NULL
 	,"reminderTitle"    NVARCHAR(255)	NOT NULL
@@ -53,7 +75,7 @@ CREATE TABLE IF NOT EXISTS "TReminders"
 	,"isDeleted"		BIT				NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS "TReminderDates"
+CREATE TABLE "TReminderDates"
 (
 	 "reminderDateID"   INTEGER			PRIMARY KEY NOT NULL
 	,"reminderID"	    INTEGER			NOT NULL
@@ -62,14 +84,14 @@ CREATE TABLE IF NOT EXISTS "TReminderDates"
 );
 
 
-CREATE TABLE IF NOT EXISTS "TMapProviders"
+CREATE TABLE "TMapProviders"
 (
 	 "mapProviderID"    INTEGER			PRIMARY KEY NOT NULL
 	,"mapProviderName"  NVARCHAR(255)	NOT NULL
 );
 
 
-CREATE TABLE IF NOT EXISTS "TMapProvidersURLS"
+CREATE TABLE "TMapProvidersURLS"
 (
 	 "mapProviderURLID" INTEGER			PRIMARY KEY NOT NULL
 	,"mapProviderID"    INTEGER			NOT NULL
@@ -77,7 +99,7 @@ CREATE TABLE IF NOT EXISTS "TMapProvidersURLS"
     ,FOREIGN KEY ( mapProviderID ) REFERENCES TMapProviders ( mapProviderID )
 );
 
-CREATE TABLE IF NOT EXISTS "TMapProviderAccessTypes"
+CREATE TABLE "TMapProviderAccessTypes"
 (
 	 "mapProviderAccessTypeID"  INTEGER			PRIMARY KEY NOT NULL
 	,"mapProviderID"            INTEGER			NOT NULL
@@ -85,7 +107,7 @@ CREATE TABLE IF NOT EXISTS "TMapProviderAccessTypes"
     ,FOREIGN KEY ( mapProviderID ) REFERENCES TMapProviders ( mapProviderID )			
 );
 
-CREATE TABLE IF NOT EXISTS "TMapProvidersURLParts"
+CREATE TABLE "TMapProvidersURLParts"
 (
 	 "mapProviderURLPartID"     INTEGER			PRIMARY KEY NOT NULL
 	,"mapProviderID"            INTEGER			NOT NULL
@@ -94,7 +116,7 @@ CREATE TABLE IF NOT EXISTS "TMapProvidersURLParts"
     ,FOREIGN KEY ( mapProviderID ) REFERENCES TMapProviders ( mapProviderID )
 );
 
-CREATE TABLE IF NOT EXISTS "TVoiceMemos"
+CREATE TABLE "TVoiceMemos"
 (
 	 "voiceMemoID"          INTEGER			PRIMARY KEY NOT NULL
 	,"fileName"         	VARCHAR(255)	NOT NULL
@@ -105,7 +127,7 @@ CREATE TABLE IF NOT EXISTS "TVoiceMemos"
     ,"recordTime"           TIME			NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS "TUserInfos"
+CREATE TABLE "TUserInfos"
 (
 	 "userInfoID"           INTEGER			PRIMARY KEY NOT NULL
 	,"userInfoTypeName"     VARCHAR(255)	NOT NULL
@@ -113,33 +135,33 @@ CREATE TABLE IF NOT EXISTS "TUserInfos"
 );
 
 
-CREATE TABLE IF NOT EXISTS "TCaches"
+CREATE TABLE "TCaches"
 (
 	 "cacheKey"		        INTEGER			PRIMARY KEY NOT NULL
 	,"cacheContents"	    NVARCHAR(255)	NOT NULL
 	,"cacheExpirationDate"  DATETIME		NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS "TBobResponses"
+CREATE TABLE "TBobResponses"
 (
 	 "bobResponseID"        INTEGER			PRIMARY KEY NOT NULL
 	,"bobResponseString"    NVARCHAR(255)	NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS "TBobResponseInputs"
+CREATE TABLE "TBobResponseInputs"
 (
 	 "bobResponseInputID"   INTEGER			PRIMARY KEY NOT NULL
 	,"bobResponseID"	    INTEGER			NOT NULL
     ,FOREIGN KEY ( bobResponseID ) REFERENCES TBobResponses( bobResponseID )
 );
 
-CREATE TABLE IF NOT EXISTS "TWeatherProviders"
+CREATE TABLE "TWeatherProviders"
 (
 	 "weatherProviderID"    INTEGER			PRIMARY KEY NOT NULL
 	,"weatherProviderName"  NVARCHAR(255)	NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS "TWeatherProviderURLS"
+CREATE TABLE "TWeatherProviderURLS"
 (
 	 "weatherProviderURLID" INTEGER			PRIMARY KEY NOT NULL
 	,"weatherProviderID"	INTEGER			NOT NULL
@@ -148,7 +170,7 @@ CREATE TABLE IF NOT EXISTS "TWeatherProviderURLS"
 );
 
 
-CREATE TABLE IF NOT EXISTS "TWeatherProviderURLParts"
+CREATE TABLE "TWeatherProviderURLParts"
 (
 	 "weatherProviderURLPartID"			INTEGER			PRIMARY KEY NOT NULL
 	,"weatherProviderID"				INTEGER			NOT NULL
@@ -157,7 +179,7 @@ CREATE TABLE IF NOT EXISTS "TWeatherProviderURLParts"
 );
 
 
-CREATE TABLE IF NOT EXISTS "TWeatherProviderAccessTypes"
+CREATE TABLE "TWeatherProviderAccessTypes"
 (
 	 "weatherProviderAccessTypeID"  INTEGER			PRIMARY KEY NOT NULL
 	,"weatherProviderID"            INTEGER			NOT NULL
