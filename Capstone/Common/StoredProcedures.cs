@@ -70,9 +70,8 @@ namespace Capstone.Common
             command.ExecuteNonQuery();
             conn.Close();
         }
-        public static string QueryReminder(int ID = -1)
+        public static DataTable QueryReminder(int ID = -1)
         {
-            String strData = "";
             string intID;
             if (ID == -1)
             {
@@ -82,20 +81,16 @@ namespace Capstone.Common
             {
                 intID = ID.ToString();
             }
-            
+
             SqliteConnection conn = OpenDatabase();
             conn.Open();
             SqliteCommand command = conn.CreateCommand();
             command.CommandText = $"Select TReminders.reminderID, TReminders.reminderTitle, TReminders.reminderTime, TReminderDates.reminderDate, TReminders.isDeleted From TReminders, TReminderDates Where TReminders.reminderID = TReminderDates.reminderID and TReminders.reminderID = COALESCE({intID}, TReminders.reminderID); ";
-            using (SqliteDataReader reader = command.ExecuteReader())
-            {
-                while (reader.Read())
-                {
-                    strData += reader.GetString(1);
-                }
-            }
+            SqliteDataReader reader = command.ExecuteReader();
+            DataTable dt = new DataTable();
+            dt.Load(reader);
             conn.Close();
-            return strData;
+            return dt;
         }
         public static void CreateAlarm(string Title, DateTime Time, DateTime Date)
         {
@@ -135,9 +130,8 @@ namespace Capstone.Common
             command.ExecuteNonQuery();
             conn.Close();
         }
-        public static string QueryAlarm(int ID = -1)
+        public static DataTable QueryAlarm(int ID = -1)
         {
-            String strData = "";
             string intID;
             if (ID == -1)
             {
@@ -152,15 +146,11 @@ namespace Capstone.Common
             conn.Open();
             SqliteCommand command = conn.CreateCommand();
             command.CommandText = $"Select TAlarms.AlarmID, TAlarms.AlarmTitle, TAlarms.AlarmTime, TAlarmDates.AlarmDate, TAlarms.isDeleted From TAlarms, TAlarmDates Where TAlarms.AlarmID = TAlarmDates.AlarmID and TAlarms.AlarmID = COALESCE({intID}, TAlarms.AlarmID); ";
-            using (SqliteDataReader reader = command.ExecuteReader())
-            {
-                while (reader.Read())
-                {
-                    strData += reader.GetString(1);
-                }
-            }
+            SqliteDataReader reader = command.ExecuteReader();
+            DataTable dt = new DataTable();
+            dt.Load(reader);
             conn.Close();
-            return strData;
+            return dt;
         }
         public static void CreateVoiceNote(string FileName, string DsiplayName, int RecordingDuration, string FilePath, DateTime RecordDate, DateTime RecordTime)
         {
