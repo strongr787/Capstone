@@ -13,6 +13,10 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using Capstone.Common;
+using System.Data;
+using Microsoft.Data.Sqlite;
+using Windows.Storage;
+
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -25,8 +29,10 @@ namespace Capstone
     {
         public FirstTimeSetup()
         {
-            this.InitializeComponent();
+            this.InitializeComponent(); 
         }
+
+
 
         private void btnContinue_Click(object sender, RoutedEventArgs e)
         {
