@@ -135,7 +135,11 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
 <<<<<<< HEAD
+<<<<<<< HEAD
     <Compile Include="Common\StoredProcedures.cs" />
+=======
+    <Compile Include="Common\DateTimeParser.cs" />
+>>>>>>> 8c4b23dfdfd50a57dcc985896c7775cf406d4656
 =======
     <Compile Include="Common\DateTimeParser.cs" />
 >>>>>>> 8c4b23dfdfd50a57dcc985896c7775cf406d4656
