@@ -1,4 +1,4 @@
-﻿using Microsoft.Data.Sqlite;
+using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -32,23 +32,6 @@ namespace Capstone.Common
             return conn;
         }
 
-        public static string SelectTestTable()
-        {
-            String strData = "Error";
-            SqliteConnection conn = OpenDatabase();
-            conn.Open();
-            SqliteCommand command = conn.CreateCommand();
-            command.CommandText = "Select TestTableTXT from TestTable;";
-            using (SqliteDataReader reader = command.ExecuteReader())
-            {
-                while (reader.Read())
-                {
-                    strData = reader.GetString(0);
-                }
-            }
-            return strData;
-        }
-
         public static void CreateReminder(string Title, DateTime Time, DateTime Date)
         {
 
@@ -61,6 +44,7 @@ namespace Capstone.Common
             command.ExecuteNonQuery();
             command.CommandText = $"INSERT INTO TReminderDates(reminderID, reminderDate) Select MAX(reminderID), '{strDate}' FROM TReminders;";
             command.ExecuteNonQuery();
+            conn.Close();
         }
         public static void UpdateReminder(int ID, string Title, DateTime Time, DateTime Date)
         {
@@ -74,6 +58,7 @@ namespace Capstone.Common
             command.ExecuteNonQuery();
             command.CommandText = $"Update TReminderDates Set reminderDate = '{Date}' Where reminderID = {intID};";
             command.ExecuteNonQuery();
+            conn.Close();
         }
         public static void DeleteReminder(int ID)
         {
@@ -83,6 +68,7 @@ namespace Capstone.Common
             SqliteCommand command = conn.CreateCommand();
             command.CommandText = $"Update TReminders Set isDeleted = 1 Where reminderID = {intID};";
             command.ExecuteNonQuery();
+            conn.Close();
         }
         public static string QueryReminder(int ID = -1)
         {
@@ -108,6 +94,7 @@ namespace Capstone.Common
                     strData += reader.GetString(1);
                 }
             }
+            conn.Close();
             return strData;
         }
         public static void CreateAlarm(string Title, DateTime Time, DateTime Date)
@@ -122,6 +109,7 @@ namespace Capstone.Common
             command.ExecuteNonQuery();
             command.CommandText = $"INSERT INTO TAlarmDates(AlarmID, AlarmDate) Select MAX(AlarmID), '{strDate}' FROM TAlarms;";
             command.ExecuteNonQuery();
+            conn.Close();
         }
         public static void UpdateAlarm(int ID, string Title, DateTime Time, DateTime Date)
         {
@@ -135,6 +123,7 @@ namespace Capstone.Common
             command.ExecuteNonQuery();
             command.CommandText = $"Update TAlarmDates Set AlarmDate = '{Date}' Where AlarmID = {intID};";
             command.ExecuteNonQuery();
+            conn.Close();
         }
         public static void DeleteAlarm(int ID)
         {
@@ -144,6 +133,7 @@ namespace Capstone.Common
             SqliteCommand command = conn.CreateCommand();
             command.CommandText = $"Update TAlarms Set isDeleted = 1 Where AlarmID = {intID};";
             command.ExecuteNonQuery();
+            conn.Close();
         }
         public static string QueryAlarm(int ID = -1)
         {
@@ -169,6 +159,7 @@ namespace Capstone.Common
                     strData += reader.GetString(1);
                 }
             }
+            conn.Close();
             return strData;
         }
         public static void CreateVoiceNote(string FileName, string DsiplayName, int RecordingDuration, string FilePath, DateTime RecordDate, DateTime RecordTime)
@@ -181,6 +172,7 @@ namespace Capstone.Common
             SqliteCommand command = conn.CreateCommand();
             command.CommandText = $"INSERT INTO TVoiceMemos(fileName,displayName,recordingDuration,filePath,recordDate,recordTime) Values('{FileName}', '{DsiplayName}', '{RecordingDuration}', '{FilePath}', '{strRecordDate}', '{strRecordTime}'); ";
             command.ExecuteNonQuery();
+            conn.Close();
         }
         public static void DeleteVoiceNote(int ID)
         {
@@ -190,6 +182,7 @@ namespace Capstone.Common
             SqliteCommand command = conn.CreateCommand();
             command.CommandText = $"Delete From TVoiceMemos Where TVoiceMemos.voiceMemoID = {intID};";
             command.ExecuteNonQuery();
+            conn.Close();
         }
         public static void UpdateVoiceNote(int ID, string Title)
         {
@@ -199,6 +192,7 @@ namespace Capstone.Common
             SqliteCommand command = conn.CreateCommand();
             command.CommandText = $"Update TVoiceMemos Set displayName = '{Title}' Where voiceMemoID = {intID};";
             command.ExecuteNonQuery();
+            conn.Close();
         }
         public static void UpdateSettings(int ID, bool IsSelected)
         {
@@ -210,7 +204,7 @@ namespace Capstone.Common
             SqliteCommand command = conn.CreateCommand();
             command.CommandText = $"Update TSettingOptions Set isSelected = {intIsSelected} Where settingOptionID = {intID};";
             command.ExecuteNonQuery();
+            conn.Close();
         }
     }
 }
-
