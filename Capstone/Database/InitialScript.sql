@@ -69,10 +69,11 @@ CREATE TABLE "TAlarmDates"
 
 CREATE TABLE "TReminders"
 (
-	 "reminderID"		INTEGER			PRIMARY KEY NOT NULL
-	,"reminderTitle"    NVARCHAR(255)	NOT NULL
-	,"reminderTime"	    TIME			NOT NULL
-	,"isDeleted"		BIT				NOT NULL
+	 "reminderID"		   INTEGER			PRIMARY KEY NOT NULL
+	,"reminderTitle"       NVARCHAR(255)	NOT NULL
+	,"reminderTime"	       TIME			    NOT NULL
+	,"reminderDescription" NVARCHAR(1024)   NOT NULL
+	,"isDeleted"		   BIT				NOT NULL
 );
 
 CREATE TABLE "TReminderDates"
