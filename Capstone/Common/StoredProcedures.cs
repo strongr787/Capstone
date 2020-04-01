@@ -94,7 +94,7 @@ namespace Capstone.Common
             {
                 while (reader.Read())
                 {
-                    int intReminderID = (int)(long)reader["reminderID"];
+                    int intReminderID = int.Parse(reader["reminderID"].ToString());
                     reminder.ReminderID = intReminderID;
                     reminder.Title = reader["reminderTitle"].ToString();
                     var date = DateTime.Parse($"{reader["reminderDate"]} {reader["reminderTime"]}");
@@ -164,7 +164,7 @@ namespace Capstone.Common
             {
                 while (reader.Read())
                 {
-                    int intAlarmID = (int)(long)reader["AlarmID"];
+                    int intAlarmID = int.Parse(reader["AlarmID"].ToString());
                     alarm.AlarmID = intAlarmID;
                     alarm.Title = reader["AlarmTitle"].ToString();
                     var date = DateTime.Parse($"{reader["AlarmDate"]} {reader["AlarmTime"]}");
@@ -230,7 +230,7 @@ namespace Capstone.Common
             {
                 while (reader.Read())
                 {
-                    int intVoiceMemoID = (int)(long)reader["voiceMemoID"];
+                    int intVoiceMemoID = int.Parse(reader["voiceMemoID"].ToString());
                     voiceMemo.VoiceMemoID = intVoiceMemoID;
                     voiceMemo.FileName = reader["fileName"].ToString();
                     voiceMemo.DisplayName = reader["displayName"].ToString();
@@ -278,7 +278,7 @@ namespace Capstone.Common
                 while (reader.Read())
                 {
                     SettingOption settingOption = new SettingOption();
-                    int intSettingOptionID = (int)(long)reader["settingOptionID"];
+                    int intSettingOptionID = int.Parse(reader["settingOptionID"].ToString());
                     settingOption.OptionID = intSettingOptionID;
                     settingOption.DisplayName = reader["optionDisplayName"].ToString();
                     settingOption.IsSelected = Convert.ToBoolean((long)reader["isSelected"]);
@@ -290,7 +290,7 @@ namespace Capstone.Common
             {
                 while (reader.Read())
                 {
-                    int intSettingID = (int)(long)reader["settingID"];
+                    int intSettingID = int.Parse(reader["settingID"].ToString());
                     setting.SettingID = intSettingID;
                     setting.DisplayName = reader["settingDisplayName"].ToString();
                     setting.Options = SettingOptionList;
@@ -320,12 +320,12 @@ namespace Capstone.Common
             {
                 while (reader.Read())
                 {
-                    int intWeatherProviderID = (int)(long)reader["weatherProviderID"];
+                    int intWeatherProviderID = int.Parse(reader["weatherProviderID"].ToString());
                     weatherProvider.WeatherProviderID = intWeatherProviderID;
                     weatherProvider.Name = reader["weatherProviderName"].ToString();
                     weatherProvider.BaseURL = reader["weatherProviderURL"].ToString();
-                    weatherProvider.AccessType = reader["weatherProviderAccessType"];
-                    weatherProvider.APIKey = reader[""];
+                    //weatherProvider.AccessType = reader["weatherProviderAccessType"];
+                    //weatherProvider.APIKey = reader[""];
                 }
             }
             conn.Close();
@@ -353,12 +353,12 @@ namespace Capstone.Common
                 while (reader.Read())
                 {
                     string AccessType = reader["mapProviderAccessType"].ToString();
-                    int intMapProviderID = (int)(long)reader["mapProviderID"];
+                    int intMapProviderID = int.Parse(reader["mapProviderID"].ToString());
                     mapProvider.MapProviderID = intMapProviderID;
                     mapProvider.Name = reader["mapProviderName"].ToString();
                     mapProvider.BaseURL = reader["mapProviderURL"].ToString();
-                    mapProvider.AccessType = AccessType;
-                    mapProvider.APIKey = reader[""];
+                    //mapProvider.AccessType = AccessType;
+                    //mapProvider.APIKey = reader[""];
                 }
             }
             conn.Close();
@@ -385,7 +385,7 @@ namespace Capstone.Common
             {
             while (reader.Read())
             {
-                int intSearchableWebsitesID = (int)(long)reader["searchableWebsitesID"];
+                int intSearchableWebsitesID = int.Parse(reader["searchableWebsitesID"].ToString());
                 searchableWebsite.SearchableWebsiteID = intSearchableWebsitesID;
                 searchableWebsite.Name = reader["searchableWebsiteName"].ToString();
                 searchableWebsite.BaseURL = reader["searchableWebsiteBaseURL"].ToString();
@@ -416,7 +416,7 @@ namespace Capstone.Common
             {
                 while (reader.Read())
                 {
-                    int intSearchEngineID = (int)(long)reader["searchEngineID"];
+                    int intSearchEngineID = int.Parse(reader["searchEngineID"].ToString());
                     searchEngine.SearchEngineID = intSearchEngineID;
                     searchEngine.Name = reader["searchEngineName"].ToString();
                     searchEngine.BaseURL = reader["searchEngineBaseURL"].ToString();
