@@ -1,4 +1,5 @@
 ﻿using Capstone.Common;
+using Capstone.Providers;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
@@ -35,6 +36,9 @@ namespace Capstone
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
             // TODO navigate to settings screen (this.Frame.Navigate(typeof(screenName)))
+
+            // DEBUG
+            WeatherService.GetWeather();
         }
 
         private void RemindersButton_Click(object sender, RoutedEventArgs e)

@@ -159,6 +159,8 @@
     <Compile Include="Models\WeatherInfo.cs" />
     <Compile Include="Models\WeatherProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Providers\LocationProvider.cs" />
+    <Compile Include="Providers\WeatherService.cs" />
     <Compile Include="RemindersFormPage.xaml.cs">
       <DependentUpon>RemindersFormPage.xaml</DependentUpon>
     </Compile>
@@ -233,6 +235,9 @@
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
       <Version>6.2.9</Version>
+    </PackageReference>
+    <PackageReference Include="Newtonsoft.Json">
+      <Version>12.0.3</Version>
     </PackageReference>
     <PackageReference Include="sqlite">
       <Version>3.13.0</Version>
