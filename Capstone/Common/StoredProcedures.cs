@@ -3,6 +3,7 @@ using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Capstone.Common
@@ -33,7 +34,10 @@ namespace Capstone.Common
 
         public static void CreateReminder(string Title, DateTime ReminderDateAndTime, string Description)
         {
-
+            // escape the single ticks
+            var tickEscape = new Regex("'");
+            Title = tickEscape.Replace(Title, "''");
+            Description = tickEscape.Replace(Description, "''");
             // gives the hour:minute [AP]m format
             string strTime = ReminderDateAndTime.ToString("t");
             // gives the month/day/year format
@@ -49,6 +53,10 @@ namespace Capstone.Common
         }
         public static void UpdateReminder(int ID, string Title, DateTime ReminderDateAndTime, string Description)
         {
+            // escape the single ticks
+            var tickEscape = new Regex("'");
+            Title = tickEscape.Replace(Title, "''");
+            Description = tickEscape.Replace(Description, "''");
             int intID = ID;
             // gives the hour:minute [AP]m format
             string strTime = ReminderDateAndTime.ToString("t");
@@ -128,7 +136,9 @@ namespace Capstone.Common
 
         public static void CreateAlarm(string Title, DateTime AlarmDateTime)
         {
-
+            // escape the single ticks
+            var tickEscape = new Regex("'");
+            Title = tickEscape.Replace(Title, "''");
             string strTime = AlarmDateTime.ToString("t");
             string strDate = AlarmDateTime.ToString("d");
             SqliteConnection conn = OpenDatabase();
@@ -142,6 +152,9 @@ namespace Capstone.Common
         }
         public static void UpdateAlarm(int ID, string Title, DateTime AlarmDateTime)
         {
+            // escape the single ticks
+            var tickEscape = new Regex("'");
+            Title = tickEscape.Replace(Title, "''");
             int intID = ID;
             string strTime = AlarmDateTime.ToString("t");
             string strDate = AlarmDateTime.ToString("d");

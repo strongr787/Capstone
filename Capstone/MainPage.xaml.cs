@@ -1,6 +1,9 @@
-﻿using Capstone.Common;
+﻿using System.Collections.Generic;
+using Windows.System;
+using Windows.UI.Core.Preview;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using System;
 
 
 namespace Capstone
@@ -16,6 +19,8 @@ namespace Capstone
             this.InitializeComponent();
             // hide the main menu
             this.MenuColumn.Width = new GridLength(0);
+            // prevent the application from closing when the user hits the x button. This will alarms and notifications to still trigger
+            SystemNavigationManagerPreview.GetForCurrentView().CloseRequested += CloseHandle;
         }
 
         private void MenuButton_OnClick(object sender, RoutedEventArgs e)
@@ -60,6 +65,14 @@ namespace Capstone
         private void LibrariesButton_Click(object sender, RoutedEventArgs e)
         {
             // TODO navigate to settings screen (this.Frame.Navigate(typeof(screenName)))
+        }
+        private async void CloseHandle(object sender, SystemNavigationCloseRequestedPreviewEventArgs e)
+        {
+            // stop the event from continuing
+            e.Handled = true;
+            IList<AppDiagnosticInfo> infos = await AppDiagnosticInfo.RequestInfoForAppAsync();
+            IList<AppResourceGroupInfo> resourceInfos = infos[0].GetResourceGroups();
+            await resourceInfos[0].StartSuspendAsync();
         }
     }
 }
