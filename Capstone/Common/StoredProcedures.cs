@@ -35,9 +35,8 @@ namespace Capstone.Common
         public static void CreateReminder(string Title, DateTime ReminderDateAndTime, string Description)
         {
             // escape the single ticks
-            var tickEscape = new Regex("'");
-            Title = tickEscape.Replace(Title, "''");
-            Description = tickEscape.Replace(Description, "''");
+            Title = EscapeSingleTicks(Title);
+            Description = EscapeSingleTicks(Description);
             // gives the hour:minute [AP]m format
             string strTime = ReminderDateAndTime.ToString("t");
             // gives the month/day/year format
@@ -54,9 +53,8 @@ namespace Capstone.Common
         public static void UpdateReminder(int ID, string Title, DateTime ReminderDateAndTime, string Description)
         {
             // escape the single ticks
-            var tickEscape = new Regex("'");
-            Title = tickEscape.Replace(Title, "''");
-            Description = tickEscape.Replace(Description, "''");
+            Title = EscapeSingleTicks(Title);
+            Description = EscapeSingleTicks(Description);
             int intID = ID;
             // gives the hour:minute [AP]m format
             string strTime = ReminderDateAndTime.ToString("t");
@@ -137,8 +135,7 @@ namespace Capstone.Common
         public static void CreateAlarm(string Title, DateTime AlarmDateTime)
         {
             // escape the single ticks
-            var tickEscape = new Regex("'");
-            Title = tickEscape.Replace(Title, "''");
+            Title = EscapeSingleTicks(Title);
             string strTime = AlarmDateTime.ToString("t");
             string strDate = AlarmDateTime.ToString("d");
             SqliteConnection conn = OpenDatabase();
@@ -153,8 +150,7 @@ namespace Capstone.Common
         public static void UpdateAlarm(int ID, string Title, DateTime AlarmDateTime)
         {
             // escape the single ticks
-            var tickEscape = new Regex("'");
-            Title = tickEscape.Replace(Title, "''");
+            Title = EscapeSingleTicks(Title);
             int intID = ID;
             string strTime = AlarmDateTime.ToString("t");
             string strDate = AlarmDateTime.ToString("d");
@@ -484,6 +480,12 @@ namespace Capstone.Common
             }
             conn.Close();
             return searchEngine;
+        }
+
+        private static string EscapeSingleTicks(string text)
+        {
+            var tickRegex = new Regex("'");
+            return tickRegex.Replace(text, "''");
         }
 
     }
