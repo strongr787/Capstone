@@ -30,8 +30,8 @@ namespace Capstone.Common
                 // get all the alarms and reminders from the database
                 try
                 {
-                    List<Alarm> alarms = StoredProcedures.QueryAllAlarms();
-                    List<Reminder> reminders = StoredProcedures.QueryAllReminders();
+                    List<Alarm> alarms = StoredProcedures.QueryAllUnexpiredAlarms();
+                    List<Reminder> reminders = StoredProcedures.QueryAllUnexpiredReminders();
                     var time = DateTime.Now;
                     // trigger all alarms that have expired
                     alarms.ForEach(alarm =>
@@ -40,7 +40,7 @@ namespace Capstone.Common
                         {
                             ShowAlarmToast(alarm);
                             // delete the alarm in the database
-                            StoredProcedures.DeleteAlarm(alarm.AlarmID);
+                            StoredProcedures.ExpireAlarm(alarm.AlarmID);
                         }
                     });
                     // trigger all reminders that have expired
@@ -51,7 +51,7 @@ namespace Capstone.Common
                             // show the reminder toast
                             ShowReminderToast(reminder);
                             // delete the reminder from the database
-                            StoredProcedures.DeleteReminder(reminder.ReminderID);
+                            StoredProcedures.ExpireReminder(reminder.ReminderID);
                         }
                     });
                 }
