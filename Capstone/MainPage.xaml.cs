@@ -1,7 +1,8 @@
 ﻿using Capstone.Actions;
-using Capstone.Common;
-using Capstone.Providers;
 using System;
+using System.Collections.Generic;
+using Windows.System;
+using Windows.UI.Core.Preview;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
@@ -25,6 +26,10 @@ namespace Capstone
             //string command = "what's the weather?";
             //Func<string, Actions.Action> foundAction = ActionRouter.GetFunctionFromCommandString(command);
             //foundAction(command).PerformAction(this.media);
+			// END DEBUG
+			
+            // prevent the application from closing when the user hits the x button. This will alarms and notifications to still trigger
+            SystemNavigationManagerPreview.GetForCurrentView().CloseRequested += CloseHandle;
         }
 
         private void MenuButton_OnClick(object sender, RoutedEventArgs e)
@@ -69,6 +74,14 @@ namespace Capstone
         private void LibrariesButton_Click(object sender, RoutedEventArgs e)
         {
             // TODO navigate to settings screen (this.Frame.Navigate(typeof(screenName)))
+        }
+        private async void CloseHandle(object sender, SystemNavigationCloseRequestedPreviewEventArgs e)
+        {
+            // stop the event from continuing
+            e.Handled = true;
+            IList<AppDiagnosticInfo> infos = await AppDiagnosticInfo.RequestInfoForAppAsync();
+            IList<AppResourceGroupInfo> resourceInfos = infos[0].GetResourceGroups();
+            await resourceInfos[0].StartSuspendAsync();
         }
     }
 }
