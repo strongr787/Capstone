@@ -23,7 +23,7 @@ namespace Capstone.Actions
             WeatherInfo firstApplicableWeatherInfo = weatherInfos.Find(info => info.DateApplicable >= commandDate);
             if (firstApplicableWeatherInfo != null && this.MediaElement != null)
             {
-                // TODO get better at determining where there should be inflection
+                // TODO get better at determining where there should be inflection. Right now this works but sounds a bit too robotic
                 string inflectionData = new SSMLBuilder().Prosody(firstApplicableWeatherInfo.Description, contour: "(30%,+10%) (60%,-10%) (90%,+5%)").Build();
                 TextToSpeechEngine.SpeakInflectedText(this.MediaElement, inflectionData);
             }

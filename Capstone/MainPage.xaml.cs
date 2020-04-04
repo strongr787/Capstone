@@ -20,6 +20,11 @@ namespace Capstone
             // hide the main menu
             this.MenuColumn.Width = new GridLength(0);
             ActionRouter.SetUp();
+
+            // DEBUG -- uncomment this code if you want to test out the weather service.
+            //string command = "what's the weather?";
+            //Func<string, Actions.Action> foundAction = ActionRouter.GetFunctionFromCommandString(command);
+            //foundAction(command).PerformAction(this.media);
         }
 
         private void MenuButton_OnClick(object sender, RoutedEventArgs e)
@@ -39,11 +44,6 @@ namespace Capstone
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
             // TODO navigate to settings screen (this.Frame.Navigate(typeof(screenName)))
-
-            // DEBUG
-            string command = "get the weather for sunday night";
-            Func<string, Actions.Action> foundAction = ActionRouter.GetFunctionFromCommandString(command);
-            foundAction(command).PerformAction(this.media);
         }
 
         private void RemindersButton_Click(object sender, RoutedEventArgs e)
