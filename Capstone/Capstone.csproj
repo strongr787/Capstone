@@ -150,6 +150,8 @@
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Models\Alarm.cs" />
+    <Compile Include="Models\json\NationalWeatherService\Forecast.cs" />
+    <Compile Include="Models\json\NationalWeatherService\Point.cs" />
     <Compile Include="Models\MapProvider.cs" />
     <Compile Include="Models\Reminder.cs" />
     <Compile Include="Models\SearchableWebsite.cs" />
@@ -239,6 +241,9 @@
     <PackageReference Include="Newtonsoft.Json">
       <Version>12.0.3</Version>
     </PackageReference>
+    <PackageReference Include="newtonsoft.Json.Schema">
+      <Version>3.0.13</Version>
+    </PackageReference>
     <PackageReference Include="sqlite">
       <Version>3.13.0</Version>
     </PackageReference>
@@ -249,6 +254,7 @@
   <ItemGroup>
     <Content Include="Assets\BobDB.db" />
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

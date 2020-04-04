@@ -1,5 +1,7 @@
-﻿using Capstone.Common;
+﻿using Capstone.Actions;
+using Capstone.Common;
 using Capstone.Providers;
+using System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
@@ -17,6 +19,7 @@ namespace Capstone
             this.InitializeComponent();
             // hide the main menu
             this.MenuColumn.Width = new GridLength(0);
+            ActionRouter.SetUp();
         }
 
         private void MenuButton_OnClick(object sender, RoutedEventArgs e)
@@ -38,7 +41,9 @@ namespace Capstone
             // TODO navigate to settings screen (this.Frame.Navigate(typeof(screenName)))
 
             // DEBUG
-            WeatherService.GetWeather();
+            string command = "get the weather for sunday night";
+            Func<string, Actions.Action> foundAction = ActionRouter.GetFunctionFromCommandString(command);
+            foundAction(command).PerformAction(this.media);
         }
 
         private void RemindersButton_Click(object sender, RoutedEventArgs e)
