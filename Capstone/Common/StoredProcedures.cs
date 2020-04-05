@@ -434,37 +434,26 @@ namespace Capstone.Common
             conn.Close();
             return setting;
         }
-        public static WeatherProvider QueryWeatherProvider(int ID = -1)
-        {
-            WeatherProvider weatherProvider = new WeatherProvider();
-            string intID;
-            if (ID == -1)
-            {
-                intID = "null";
-            }
-            else
-            {
-                intID = ID.ToString();
-            }
 
+        public static WeatherProvider QueryWeatherProvider(string ProviderName = "")
+        {
+            WeatherProvider provider = null;
             SqliteConnection conn = OpenDatabase();
             conn.Open();
             SqliteCommand command = conn.CreateCommand();
-            command.CommandText = $"Select TWeatherProviders.weatherProviderID, TWeatherProviders.weatherProviderName,TWeatherProviderURLS.weatherProviderURL,TWeatherProviderURLParts.weatherProviderURLPartURLString,TWeatherProviderAccessTypes.weatherProviderAccessType From TWeatherProviders, TWeatherProviderURLS, TWeatherProviderURLParts, TWeatherProviderAccessTypes Where TWeatherProviders.weatherProviderID = COALESCE({intID}, TWeatherProviders.weatherProviderID) and TWeatherProviders.weatherProviderID = TWeatherProviderURLS.weatherProviderID and TWeatherProviders.weatherProviderID = TWeatherProviderURLParts.weatherProviderID and TWeatherProviders.weatherProviderID = TWeatherProviderAccessTypes.weatherProviderID; ";
+            command.CommandText = @"SELECT TWeatherProviders.weatherProviderID, TWeatherProviders.weatherProviderName, TWeatherProviderURLS.weatherProviderURL AS 'baseURL', group_concat(TWeatherProviderURLParts.weatherProviderURLPartURLString,'###') AS 'urlParts', TWeatherProviderAccessTypes.weatherProviderAccessType AS 'type'
+                                    FROM TWeatherProviders, TWeatherProviderURLS, TWeatherProviderURLParts, TWeatherProviderAccessTypes
+                                    WHERE TWeatherProviders.weatherProviderID = TWeatherProviderURLS.weatherProviderID AND TWeatherProviders.weatherProviderID = TWeatherProviderURLParts.weatherProviderID
+                                    AND TWeatherProviders.weatherProviderName = '{providerName}';".Replace("{providerName}", ProviderName);
             using (SqliteDataReader reader = command.ExecuteReader())
             {
-                while (reader.Read())
+                if (reader.Read())
                 {
-                    int intWeatherProviderID = int.Parse(reader["weatherProviderID"].ToString());
-                    weatherProvider.WeatherProviderID = intWeatherProviderID;
-                    weatherProvider.Name = reader["weatherProviderName"].ToString();
-                    weatherProvider.BaseURL = reader["weatherProviderURL"].ToString();
-                    //weatherProvider.AccessType = reader["weatherProviderAccessType"];
-                    //weatherProvider.APIKey = reader[""];
+                    provider = WeatherProvider.FromDataRow(reader);
                 }
             }
             conn.Close();
-            return weatherProvider;
+            return provider;
         }
         public static MapProvider QueryMapProvider(int ID = -1)
         {
