@@ -194,9 +194,9 @@ namespace Capstone.Actions
             {
                 this.ClearArea();
                 // no reminder found, tell the user
-                string message = new SSMLBuilder().Prosody("Sorry, but I wasn't able to find an reminder for that time.", contour: "(0%,+5%) (1%,-5%) (2%,+1%) (3%,-1%) (10%,+1%) (20%,-1%) (30%,+1%) (40%,-1%) (50%,+1%) (80%,-1%)").Build();
+                string message = new SSMLBuilder().Prosody("Sorry, but I wasn't able to find a reminder for that time.", contour: "(0%,+5%) (1%,-5%) (2%,+1%) (3%,-1%) (10%,+1%) (20%,-1%) (30%,+1%) (40%,-1%) (50%,+1%) (80%,-1%)").Build();
                 TextToSpeechEngine.SpeakInflectedText(this.MediaElement, message);
-                this.ShowMessage("Sorry, but I wasn't able to find an reminder for that time.");
+                this.ShowMessage("Sorry, but I wasn't able to find a reminder for that time.");
             }
         }
 
