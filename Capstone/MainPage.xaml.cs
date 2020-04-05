@@ -4,7 +4,8 @@ using Windows.UI.Core.Preview;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using System;
-
+using Windows.UI.Core;
+using Windows.UI.Popups;
 
 namespace Capstone
 {
@@ -21,6 +22,7 @@ namespace Capstone
             this.MenuColumn.Width = new GridLength(0);
             // prevent the application from closing when the user hits the x button. This will alarms and notifications to still trigger
             SystemNavigationManagerPreview.GetForCurrentView().CloseRequested += CloseHandle;
+            Window.Current.SizeChanged += SizeChangedHandler;
         }
 
         private void MenuButton_OnClick(object sender, RoutedEventArgs e)
@@ -73,6 +75,18 @@ namespace Capstone
             IList<AppDiagnosticInfo> infos = await AppDiagnosticInfo.RequestInfoForAppAsync();
             IList<AppResourceGroupInfo> resourceInfos = infos[0].GetResourceGroups();
             await resourceInfos[0].StartSuspendAsync();
+        }
+
+        private void SizeChangedHandler(object sender, WindowSizeChangedEventArgs e)
+        {
+            if(e.Size.Height < 600)
+            {
+                // reduce the height of the text box row to give the dynamic area more space to display content
+                this.TextBoxRow.Height = new GridLength(112);
+            } else
+            {
+                this.TextBoxRow.Height = new GridLength(224);
+            }
         }
     }
 }
