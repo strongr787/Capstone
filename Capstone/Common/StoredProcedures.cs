@@ -227,6 +227,26 @@ namespace Capstone.Common
             command.ExecuteNonQuery();
             conn.Close();
         }
+
+        public static void DeleteLatestAlarm()
+        {
+            using (SqliteConnection conn = OpenDatabase())
+            {
+                conn.Open();
+                using (SqliteCommand maxIDCommand = conn.CreateCommand())
+                using (SqliteCommand deleteLatestCommand = conn.CreateCommand())
+                {
+                    maxIDCommand.CommandText = "SELECT MAX(alarmID) as alarmID FROM TAlarms";
+                    SqliteDataReader reader = maxIDCommand.ExecuteReader();
+                    reader.Read();
+                    int alarmID = int.Parse(reader["alarmID"].ToString());
+                    deleteLatestCommand.CommandText = $"UPDATE TAlarms SET isDeleted = 1 WHERE alarmID = {alarmID}";
+                    deleteLatestCommand.ExecuteNonQuery();
+                    reader.Close();
+                }
+            }
+        }
+
         public static Alarm QueryAlarm(int ID = -1)
         {
             Alarm alarm = new Alarm();

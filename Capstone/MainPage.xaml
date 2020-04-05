@@ -4,7 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Capstone"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:media="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
@@ -21,7 +21,7 @@
             <RowDefinition x:Name="TextBoxRow"  Height="224"/>
         </Grid.RowDefinitions>
         <!--The main menu bar-->
-        <ScrollViewer x:Name="MenuPanel"  Grid.Row="0" Grid.RowSpan="3" Grid.Column="0">
+        <ScrollViewer x:Name="MenuPanel"  Grid.Row="0" Grid.RowSpan="3" Grid.Column="0" Background="{ThemeResource SystemControlAccentAcrylicElementAccentMediumHighBrush}">
             <StackPanel Grid.RowSpan="3" Grid.Row="0" Grid.Column="0">
                 <Button x:Name="SettingsButton" Background="Transparent" Content="Settings" HorizontalAlignment="Stretch" Height="62" Margin="25" Click="SettingsButton_Click"/>
                 <Button x:Name="RemindersButton" Background="Transparent" Content="Reminders" HorizontalAlignment="Stretch" Height="62" Margin="25,0,25,25" Click="RemindersButton_Click"/>
@@ -41,8 +41,9 @@
             <SymbolIcon Symbol="GlobalNavigationButton" Height="20" VerticalAlignment="Bottom"/>
         </Button>
         <!--the width for now is just temporary. It will be overridden in code-->
-        <Canvas x:Name="DynamicArea" Background="Red" Grid.Row="1" Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="25,0,25,0"></Canvas>
-        <TextBox Grid.Row="2" Grid.Column="1" x:Name="CommandBox" Margin="25" Text="" TextWrapping="Wrap" PlaceholderText="Type a command for Bob to do, or question for him to answer" Height="32" VerticalAlignment="Top"/>
+        <RelativePanel x:Name="DynamicArea" Grid.Row="1" Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="25,0,25,0">
+        </RelativePanel>
+        <TextBox Grid.Row="2" Grid.Column="1" x:Name="CommandBox" Margin="25" Text="" TextWrapping="Wrap" PlaceholderText="Type a command for Bob to do, or question for him to answer" Height="32" VerticalAlignment="Top" KeyDown="CommandBox_KeyDown"/>
         <MediaElement x:Name="media" Visibility="Collapsed"/>
     </Grid>
 </Page>
