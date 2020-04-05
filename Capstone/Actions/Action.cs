@@ -1,4 +1,5 @@
 ﻿using System.Threading;
+using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
 namespace Capstone.Actions
@@ -12,12 +13,16 @@ namespace Capstone.Actions
         /// This is the full string use to pick out the action. It can be used to provided context to the action
         /// </summary>
         protected string CommandString { get; set; }
+
+        /// <summary>
+        /// this is an object where visual elements of the action can be displayed
+        /// </summary>
+        protected RelativePanel DynamicArea { get; set; }
+
         /// <summary>
         /// Used in the event the action requires sending data to the computer speakers
         /// </summary>
         protected MediaElement MediaElement { get; set; }
-
-        protected RelativePanel DynamicArea { get; set; }
 
         public abstract void PerformAction();
 
@@ -47,24 +52,20 @@ namespace Capstone.Actions
         }
 
         /// <summary>
-        /// Displays the passed <paramref name="messageToShow"/> on our dynamic area
+        /// Clears out all children of our <see cref="DynamicArea"/>
         /// </summary>
-        /// <param name="messageToShow"></param>
-        protected void ShowMessage(string messageToShow)
+        protected void ClearArea()
         {
             if (this.DynamicArea != null)
             {
                 this.DynamicArea.Children.Clear();
-                TextBlock textBlock = new TextBlock();
-                textBlock.FontSize = 52;
-                textBlock.Text = messageToShow;
-                this.DynamicArea.Children.Add(textBlock);
-                RelativePanel.SetAlignVerticalCenterWithPanel(textBlock, true);
-                RelativePanel.SetAlignHorizontalCenterWithPanel(textBlock, true);
             }
         }
 
-        private void ShowLoading()
+        /// <summary>
+        /// Shows a loading ring on our <see cref="DynamicArea"/>, clearing the area before displaying the ring
+        /// </summary>
+        protected void ShowLoading()
         {
             if (this.DynamicArea != null)
             {
@@ -77,6 +78,29 @@ namespace Capstone.Actions
                 RelativePanel.SetAlignVerticalCenterWithPanel(theRing, true);
                 this.DynamicArea.Children.Add(theRing);
                 theRing.IsActive = true;
+            }
+        }
+
+        /// <summary>
+        /// Displays the passed <paramref name="messageToShow"/> on our dynamic area
+        /// </summary>
+        /// <param name="messageToShow"></param>
+        protected void ShowMessage(string messageToShow)
+        {
+            if (this.DynamicArea != null)
+            {
+                this.DynamicArea.Children.Clear();
+                TextBlock textBlock = new TextBlock
+                {
+                    FontSize = 48,
+                    Text = messageToShow,
+                    TextWrapping = TextWrapping.Wrap
+                };
+                ScrollViewer scrollPanel = new ScrollViewer();
+                this.DynamicArea.Children.Add(scrollPanel);
+                RelativePanel.SetAlignVerticalCenterWithPanel(scrollPanel, true);
+                RelativePanel.SetAlignHorizontalCenterWithPanel(scrollPanel, true);
+                scrollPanel.Content = textBlock;
             }
         }
     }

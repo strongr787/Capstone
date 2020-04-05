@@ -14,16 +14,23 @@ namespace Capstone.Actions
 {
     public class AlarmAction : Action
     {
-        public string Title { get; set; }
-        public DateTime ActivateDateAndTime { get; set; }
-        public AlarmActionTypes ActionType { get; set; }
-        public object Alarms { get; private set; }
-
         public AlarmAction(AlarmActionTypes ActionType, string CommandString)
         {
             this.ActionType = ActionType;
             this.CommandString = CommandString;
         }
+
+        public enum AlarmActionTypes
+        {
+            CREATE = 0,
+            EDIT = 1,
+            DELETE = 2
+        }
+
+        public AlarmActionTypes ActionType { get; set; }
+        public DateTime ActivateDateAndTime { get; set; }
+        public object Alarms { get; private set; }
+        public string Title { get; set; }
         public override async void PerformAction()
         {
             AlarmActionTypes desiredAction = this.GetActionFromCommand();
@@ -31,6 +38,7 @@ namespace Capstone.Actions
             {
                 case AlarmActionTypes.CREATE:
                     var alarm = await this.NewAlarm();
+                    this.ClearArea();
                     if (this.DynamicArea != null)
                     {
                         RelativePanel panel = CreateAlarmCard(alarm);
@@ -48,21 +56,14 @@ namespace Capstone.Actions
             }
         }
 
-        private async Task<DateTime> GetAlarmDateAndTime()
+        private async Task<Alarm> CreateAlarm()
         {
-            DateTime activatedDateTime;
-
-            try
-            {
-                activatedDateTime = DateTimeParser.ParseDateTimeFromText(this.CommandString);
-            }
-            catch (DateParseException)
-            {
-                // TODO ask for the date and time since it could not be parsed once the speech recognition is set up
-                activatedDateTime = DateTime.Now;
-            }
-
-            return activatedDateTime;
+            Alarm createdAlarm = new Alarm();
+            DateTime dateTime = await GetAlarmDateAndTime();
+            string title = FindAlarmTitle();
+            createdAlarm.Title = title;
+            createdAlarm.ActivateDateAndTime = dateTime;
+            return createdAlarm;
         }
 
         private RelativePanel CreateAlarmCard(Alarm AlarmToAdd)
@@ -96,6 +97,22 @@ namespace Capstone.Actions
             return alarmPanel;
         }
 
+        private TextBlock CreateAlarmDateBlock(Alarm AlarmToAdd)
+        {
+            var alarmDateBlock = new TextBlock();
+            alarmDateBlock.Text = AlarmToAdd.ActivateDateAndTime.ToString("g");
+            alarmDateBlock.FontSize = 24;
+            alarmDateBlock.Margin = new Thickness(10);
+            // if the reminder is expired, gray out the text and strike through it
+            if (AlarmToAdd.IsExpired)
+            {
+                alarmDateBlock.TextDecorations = TextDecorations.Strikethrough;
+                Brush grayBrush = new SolidColorBrush(Colors.Gray);
+                alarmDateBlock.Foreground = grayBrush;
+            }
+            return alarmDateBlock;
+        }
+
         private TextBlock CreateAlarmTitleBlock(Alarm AlarmToAdd)
         {
             var alarmTitleBlock = new TextBlock();
@@ -114,22 +131,6 @@ namespace Capstone.Actions
             return alarmTitleBlock;
         }
 
-        private TextBlock CreateAlarmDateBlock(Alarm AlarmToAdd)
-        {
-            var alarmDateBlock = new TextBlock();
-            alarmDateBlock.Text = AlarmToAdd.ActivateDateAndTime.ToString("g");
-            alarmDateBlock.FontSize = 24;
-            alarmDateBlock.Margin = new Thickness(10);
-            // if the reminder is expired, gray out the text and strike through it
-            if (AlarmToAdd.IsExpired)
-            {
-                alarmDateBlock.TextDecorations = TextDecorations.Strikethrough;
-                Brush grayBrush = new SolidColorBrush(Colors.Gray);
-                alarmDateBlock.Foreground = grayBrush;
-            }
-            return alarmDateBlock;
-        }
-
         private Button CreateDeleteButton(Alarm AlarmToAdd)
         {
             Button deleteButton = new Button();
@@ -143,11 +144,31 @@ namespace Capstone.Actions
         private Button CreateEditButton(Alarm AlarmToAdd)
         {
             Button editButton = new Button();
-            editButton.Click += (sender, eventArgs) => this.EditAlarm(AlarmToAdd);
+            editButton.Click += (sender, eventArgs) => this.EditLatestAlarm();
             editButton.Content = "Edit";
             editButton.Width = 150;
             editButton.Margin = new Thickness(10);
             return editButton;
+        }
+
+        private void DeleteAlarm()
+        {
+            Alarm alarmToDelete = GetAlarmForClosestMatchToPassedDate();
+            if (alarmToDelete != null)
+            {
+                StoredProcedures.DeleteAlarm(alarmToDelete.AlarmID);
+                string message = new SSMLBuilder().Prosody("Alright, cancelled your alarm.", contour: "(0%, +5%) (10%,-5%) (50%,+1%) (80%,+5%)").Build();
+                TextToSpeechEngine.SpeakInflectedText(this.MediaElement, message);
+                ShowMessage($"Successfully deleted alarm {alarmToDelete.Title}");
+            }
+            else
+            {
+                this.ClearArea();
+                // no alarm found, tell the user
+                string message = new SSMLBuilder().Prosody("Sorry, but I wasn't able to find an alarm for that time.", contour: "(0%,+5%) (1%,-5%) (2%,+1%) (3%,-1%) (10%,+1%) (20%,-1%) (30%,+1%) (40%,-1%) (50%,+1%) (80%,-1%)").Build();
+                TextToSpeechEngine.SpeakInflectedText(this.MediaElement, message);
+                this.ShowMessage("Sorry, but I wasn't able to find an alarm for that time.");
+            }
         }
 
         private void DeleteLatestAlarm()
@@ -160,74 +181,31 @@ namespace Capstone.Actions
             }
         }
 
-        private void EditAlarm(Alarm AlarmToEdit)
-        {
-            (Window.Current.Content as Frame).Navigate(typeof(AlarmsFormPage), AlarmToEdit);
-        }
-
-        private async Task<Alarm> NewAlarm()
-        {
-            Alarm createdAlarm = await this.CreateAlarm();
-            // insert the alarm into the database
-            StoredProcedures.CreateAlarm(createdAlarm.Title, createdAlarm.ActivateDateAndTime);
-            string mainPart = $"Alright, alarm set for ";
-            string datePart = createdAlarm.ActivateDateAndTime.ToString("MMM d");
-            string timePart = createdAlarm.ActivateDateAndTime.ToString("h:mm tt");
-            string rawSSML = new SSMLBuilder().Add(mainPart).SayAs(datePart, SSMLBuilder.SayAsTypes.DATE).Add(" at ").SayAs(timePart, SSMLBuilder.SayAsTypes.TIME).BuildWithoutWrapperElement();
-            string prosodySSML = new SSMLBuilder().Prosody(rawSSML, pitch: "+5%", contour: "(10%,+5%) (50%,-5%) (80%,-5%)").Build();
-            TextToSpeechEngine.SpeakInflectedText(this.MediaElement, prosodySSML);
-            return createdAlarm;
-        }
-
         private void EditAlarm()
-            // it's pretty hard to figure out which alarm to edit and which fields need to be edited, so direct the users to the alarms page
         {
+            // it's pretty hard to figure out which alarm to edit and which fields need to be edited, so direct the users to the alarms page
+            this.ClearArea();
             string text = "For now, editing alarms through voice is not supported. You can edit an alarm by going to the alarms page, finding the alarm you want to edit, and clicking the \"edit\" button.";
             string ssmlText = new SSMLBuilder().Prosody(text, pitch: "+2%", contour: "(10%,-2%) (40%, -3%) (80%, +3%)").Build();
             TextToSpeechEngine.SpeakInflectedText(this.MediaElement, ssmlText);
+            this.ShowMessage(text);
         }
 
-        private void DeleteAlarm()
+        private void EditLatestAlarm()
         {
-            Alarm alarmToDelete = GetAlarmForClosestMatchToPassedDate();
-            if (alarmToDelete != null)
-            {
-                StoredProcedures.DeleteAlarm(alarmToDelete.AlarmID);
-                string message = new SSMLBuilder().Prosody("Successfully deleted alarm.", contour: "(1%,+2%) (50%,-1%) (80%,-1%)").Build();
-                TextToSpeechEngine.SpeakInflectedText(this.MediaElement, message);
-                ShowMessage($"Successfully deleted alarm {alarmToDelete.Title}");
-            }
-            else
-            {
-                // no alarm found, tell the user
-                string message = new SSMLBuilder().Prosody("Sorry, but I wasn't able to find an alarm for that time.", contour: "(0%,+5%) (1%,-5%) (2%,+1%) (3%,-1%) (10%,+1%) (20%,-1%) (30%,+1%) (40%,-1%) (50%,+1%) (80%,-1%)").Build();
-                TextToSpeechEngine.SpeakInflectedText(this.MediaElement, message);
-            }
+            (Window.Current.Content as Frame).Navigate(typeof(AlarmsFormPage), StoredProcedures.QueryLatestAlarm());
         }
 
-        /// <summary>
-        /// Attempts to find the alarm whose activation date matches the passed date in this object's commandString
-        /// </summary>
-        /// <returns>the found alarm, which may be null if an alarm wasn't found</returns>
-        private Alarm GetAlarmForClosestMatchToPassedDate()
+        private string FindAlarmTitle()
         {
-            List<Alarm> alarms = StoredProcedures.QueryAllUnexpiredAlarms();
-            // get the date from the command text
-            var now = DateTime.Now;
-            // putting in the datetime to start at midnight of this day so that times don't get shifted around. I know it's marked as only used for tests, but it's what I had to do
-            DateTime commandDateTime = DateTimeParser.ParseDateTimeFromText(this.CommandString, new DateTime(now.Year, now.Month, now.Day, 0, 0, 0));
-            Alarm foundAlarm = null;
-            // if there's only one alarm, that's the one we're getting
-            if (alarms.Count == 1)
+            string title = "";
+            var titleIdentifierRegex = new Regex("(?<=(named |called |titled )).+");
+            var match = titleIdentifierRegex.Match(this.CommandString);
+            if (match.Success)
             {
-                foundAlarm = alarms[0];
+                title = match.Value;
             }
-            else
-            {
-                // find the first alarm whose hour and minute matches the command date time
-                foundAlarm = alarms.Find(alarm => alarm.ActivateDateAndTime.Hour == commandDateTime.Hour && alarm.ActivateDateAndTime.Minute == commandDateTime.Minute);
-            }
-            return foundAlarm;
+            return title;
         }
 
         private AlarmActionTypes GetActionFromCommand()
@@ -254,33 +232,61 @@ namespace Capstone.Actions
             }
         }
 
-        private async Task<Alarm> CreateAlarm()
+        private async Task<DateTime> GetAlarmDateAndTime()
         {
-            Alarm createdAlarm = new Alarm();
-            DateTime dateTime = await GetAlarmDateAndTime();
-            string title = FindAlarmTitle();
-            createdAlarm.Title = title;
-            createdAlarm.ActivateDateAndTime = dateTime;
-            return createdAlarm;
-        }
+            DateTime activatedDateTime;
 
-        private string FindAlarmTitle()
-        {
-            string title = "";
-            var titleIdentifierRegex = new Regex("(?<=(named |called |titled )).+");
-            var match = titleIdentifierRegex.Match(this.CommandString);
-            if (match.Success)
+            try
             {
-                title = match.Value;
+                var titleRegex = new Regex("(?i)(called|titled|named)(?-i)");
+                var commandWithoutTitle = titleRegex.Split(this.CommandString)[0].Trim();
+                activatedDateTime = DateTimeParser.ParseDateTimeFromText(commandWithoutTitle);
             }
-            return title;
+            catch (DateParseException)
+            {
+                // TODO ask for the date and time since it could not be parsed once the speech recognition is set up
+                activatedDateTime = DateTime.Now;
+            }
+
+            return activatedDateTime;
+        }
+        /// <summary>
+        /// Attempts to find the alarm whose activation date matches the passed date in this object's commandString
+        /// </summary>
+        /// <returns>the found alarm, which may be null if an alarm wasn't found</returns>
+        private Alarm GetAlarmForClosestMatchToPassedDate()
+        {
+            List<Alarm> alarms = StoredProcedures.QueryAllUnexpiredAlarms();
+            // get the date from the command text
+            var now = DateTime.Now;
+            // putting in the datetime to start at midnight of this day so that times don't get shifted around. I know it's marked as only used for tests, but it's what I had to do
+            DateTime commandDateTime = DateTimeParser.ParseDateTimeFromText(this.CommandString, new DateTime(now.Year, now.Month, now.Day, 0, 0, 0));
+            Alarm foundAlarm = null;
+            // if there's only one alarm, that's the one we're getting
+            if (alarms.Count == 1)
+            {
+                foundAlarm = alarms[0];
+            }
+            else
+            {
+                // find the first alarm whose hour and minute matches the command date time
+                foundAlarm = alarms.Find(alarm => alarm.ActivateDateAndTime.Hour == commandDateTime.Hour && alarm.ActivateDateAndTime.Minute == commandDateTime.Minute);
+            }
+            return foundAlarm;
         }
 
-        public enum AlarmActionTypes
+        private async Task<Alarm> NewAlarm()
         {
-            CREATE = 0,
-            EDIT = 1,
-            DELETE = 2
+            Alarm createdAlarm = await this.CreateAlarm();
+            // insert the alarm into the database
+            StoredProcedures.CreateAlarm(createdAlarm.Title, createdAlarm.ActivateDateAndTime);
+            string mainPart = $"Alright, alarm set for ";
+            string datePart = createdAlarm.ActivateDateAndTime.ToString("MMM d");
+            string timePart = createdAlarm.ActivateDateAndTime.ToString("h:mm tt");
+            string rawSSML = new SSMLBuilder().Add(mainPart).SayAs(datePart, SSMLBuilder.SayAsTypes.DATE).Add(" at ").SayAs(timePart, SSMLBuilder.SayAsTypes.TIME).BuildWithoutWrapperElement();
+            string prosodySSML = new SSMLBuilder().Prosody(rawSSML, pitch: "+5%", contour: "(10%,+5%) (50%,-5%) (80%,-5%)").Build();
+            TextToSpeechEngine.SpeakInflectedText(this.MediaElement, prosodySSML);
+            return createdAlarm;
         }
     }
 }

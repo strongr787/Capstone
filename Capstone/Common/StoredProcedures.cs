@@ -171,6 +171,44 @@ namespace Capstone.Common
             }
         }
 
+        public static Reminder QueryLatestReminder()
+        {
+            Reminder queriedReminder = null;
+            using (SqliteConnection conn = OpenDatabase())
+            {
+                conn.Open();
+                using (SqliteCommand latestIDCommand = conn.CreateCommand())
+                {
+                    latestIDCommand.CommandText = "SELECT MAX(reminderID) as reminderID from TReminders";
+                    SqliteDataReader reader = latestIDCommand.ExecuteReader();
+                    reader.Read();
+                    int id = int.Parse(reader["reminderID"].ToString());
+                    queriedReminder = QueryReminder(id);
+                    reader.Close();
+                }
+            }
+            return queriedReminder;
+        }
+
+        public static void DeleteLatestReminder()
+        {
+            using (SqliteConnection conn = OpenDatabase())
+            {
+                conn.Open();
+                using (SqliteCommand maxIDCommand = conn.CreateCommand())
+                using (SqliteCommand deleteLatestCommand = conn.CreateCommand())
+                {
+                    maxIDCommand.CommandText = "SELECT MAX(reminderID) as reminderID FROM TReminders";
+                    SqliteDataReader reader = maxIDCommand.ExecuteReader();
+                    reader.Read();
+                    int reminderID = int.Parse(reader["reminderID"].ToString());
+                    deleteLatestCommand.CommandText = $"UPDATE TReminders SET isDeleted = 1 WHERE reminderID = {reminderID}";
+                    deleteLatestCommand.ExecuteNonQuery();
+                    reader.Close();
+                }
+            }
+        }
+
         public static void CreateAlarm(string Title, DateTime AlarmDateTime)
         {
             // escape the single ticks
@@ -228,6 +266,25 @@ namespace Capstone.Common
             conn.Close();
         }
 
+        public static Alarm QueryLatestAlarm()
+        {
+            Alarm queriedAlarm = null;
+            using (SqliteConnection conn = OpenDatabase())
+            {
+                conn.Open();
+                using (SqliteCommand latestIDCommand = conn.CreateCommand())
+                {
+                    latestIDCommand.CommandText = "SELECT MAX(alarmID) as alarmID from TAlarms";
+                    SqliteDataReader reader = latestIDCommand.ExecuteReader();
+                    reader.Read();
+                    int id = int.Parse(reader["alarmID"].ToString());
+                    queriedAlarm = QueryAlarm(id);
+                    reader.Close();
+                }
+            }
+            return queriedAlarm;
+        }
+
         public static void DeleteLatestAlarm()
         {
             using (SqliteConnection conn = OpenDatabase())
@@ -250,31 +307,14 @@ namespace Capstone.Common
         public static Alarm QueryAlarm(int ID = -1)
         {
             Alarm alarm = new Alarm();
-            string intID;
-            if (ID == -1)
-            {
-                intID = "null";
-            }
-            else
-            {
-                intID = ID.ToString();
-            }
-
             SqliteConnection conn = OpenDatabase();
             conn.Open();
             SqliteCommand command = conn.CreateCommand();
-            command.CommandText = $"Select TAlarms.AlarmID, TAlarms.AlarmTitle, TAlarms.AlarmTime, TAlarmDates.AlarmDate, TAlarms.isDeleted, TAlarms.isExpired From TAlarms, TAlarmDates Where TAlarms.AlarmID = TAlarmDates.AlarmID and TAlarms.AlarmID = COALESCE({intID}, TAlarms.AlarmID); ";
+            command.CommandText = $"Select TAlarms.AlarmID, TAlarms.AlarmTitle, TAlarms.AlarmTime, TAlarmDates.AlarmDate, TAlarms.isDeleted, TAlarms.isExpired From TAlarms, TAlarmDates Where TAlarms.AlarmID = TAlarmDates.AlarmID and TAlarms.AlarmID = COALESCE({ID}, TAlarms.AlarmID); ";
             using (SqliteDataReader reader = command.ExecuteReader())
             {
-                while (reader.Read())
-                {
-                    int intAlarmID = int.Parse(reader["AlarmID"].ToString());
-                    alarm.AlarmID = intAlarmID;
-                    alarm.Title = reader["AlarmTitle"].ToString();
-                    var date = DateTime.Parse($"{reader["AlarmDate"]} {reader["AlarmTime"]}");
-                    alarm.ActivateDateAndTime = date;
-                    alarm.IsDeleted = Convert.ToBoolean((long)reader["isDeleted"]);
-                }
+                reader.Read();
+                alarm = Alarm.FromDataRow(reader);
             }
             conn.Close();
             return alarm;

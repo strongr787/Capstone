@@ -8,7 +8,6 @@ namespace Capstone.Actions
 {
     public class WeatherAction : Action
     {
-
         public WeatherAction(string CommandString)
         {
             this.CommandString = CommandString;
@@ -23,14 +22,33 @@ namespace Capstone.Actions
             WeatherInfo firstApplicableWeatherInfo = weatherInfos.Find(info => info.DateApplicable >= commandDate);
             if (firstApplicableWeatherInfo != null && this.MediaElement != null)
             {
+                this.ClearArea();
                 // TODO get better at determining where there should be inflection. Right now this works but sounds a bit too robotic
-                string inflectionData = new SSMLBuilder().Prosody(firstApplicableWeatherInfo.Description, contour: "(30%,+10%) (60%,-10%) (90%,+5%)").Build();
+                string inflectionData = new SSMLBuilder().Prosody(SplitWeatherDescUpIntoSSMLSentences(firstApplicableWeatherInfo.Description), contour: "(30%,+10%) (60%,-10%) (90%,+5%)").Build();
                 TextToSpeechEngine.SpeakInflectedText(this.MediaElement, inflectionData);
+                this.ShowMessage(firstApplicableWeatherInfo.Description);
             }
             else if (firstApplicableWeatherInfo == null)
             {
                 TextToSpeechEngine.SpeakText(this.MediaElement, "I could not find any weather info for the date specified. Try staying within the next 5 days for consistent results.");
             }
+        }
+
+        /// <summary>
+        /// enforces spoken sentence structure in weather description by wrapping all the sentences in an ssml &lt;sentence&gt; tag. This prevents the text to speech engine from misreading a sentence (e.g. 45mph. will not be counted as a sentence because it thinks the period is used in an abbreviation)
+        /// </summary>
+        /// <param name="weatherDescription">the string to split into forced sentences</param>
+        /// <returns></returns>
+        private string SplitWeatherDescUpIntoSSMLSentences(string weatherDescription)
+        {
+            string ssmlDescription = "";
+            string[] descriptionSentences = weatherDescription.Split(".");
+            foreach (string sentence in descriptionSentences)
+            {
+                ssmlDescription += new SSMLBuilder().Sentence(sentence + ".").BuildWithoutWrapperElement();
+            }
+
+            return ssmlDescription;
         }
     }
 }
