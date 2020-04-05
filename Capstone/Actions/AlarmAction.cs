@@ -28,9 +28,6 @@ namespace Capstone.Actions
         }
 
         public AlarmActionTypes ActionType { get; set; }
-        public DateTime ActivateDateAndTime { get; set; }
-        public object Alarms { get; private set; }
-        public string Title { get; set; }
         public override async void PerformAction()
         {
             AlarmActionTypes desiredAction = this.GetActionFromCommand();

@@ -28,9 +28,6 @@ namespace Capstone.Actions
         }
 
         public ReminderActionTypes ActionType { get; set; }
-        public DateTime ActivateDateAndTime { get; set; }
-        public object Reminders { get; private set; }
-        public string Title { get; set; }
         public override async void PerformAction()
         {
             ReminderActionTypes desiredAction = this.GetActionFromCommand();
