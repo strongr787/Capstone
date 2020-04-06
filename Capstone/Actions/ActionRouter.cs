@@ -10,6 +10,8 @@ namespace Capstone.Actions
         // a case-insensitive dictionary. Due to runtime binding the second argument needs to be set to "dynamic". In practice, this value is  Dictionary<string, dynamic>. The dynamic keeps going until a value of type Func<string, Action> is reached
         private static Dictionary<string, dynamic> actionTree;
 
+        public static bool IsSetup { get; private set; } = false;
+
         public static void SetUp()
         {
             // initialize the action tree
@@ -21,6 +23,7 @@ namespace Capstone.Actions
             SetUpWeatherBranches();
             SetUpVoiceNoteBranches();
             SetUpInternetSearchBranches();
+            IsSetup = true;
         }
 
         private static void SetUpWeatherBranches()

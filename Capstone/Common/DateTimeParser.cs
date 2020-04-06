@@ -63,7 +63,7 @@ namespace Capstone.Common
         public static readonly string AFTERNOON = "4:00 pm";
         public static readonly string EVENING = "6:00 pm";
         public static readonly string NIGHT = "8:00 pm";
-        public static readonly string MIDNIGHT = "12:00 am";
+        public static readonly string MIDNIGHT = "tomorrow 12:00 am";
 
         /// <summary>
         /// Formats a time-like piece of string to be in a parseable format by <see cref="DateTime.Parse(string)"/>
@@ -446,9 +446,27 @@ namespace Capstone.Common
             var now = onlyUsedForTests;
             // get the formatted time from the text
             string timePart = GetTimePartOfString(text);
-            string formattedTimePart = FormatTime(timePart);
-            var parsedTime = DateTime.Parse(formattedTimePart);
-            var parsedDate = onlyUsedForTests.Date + parsedTime.TimeOfDay;
+            DateTime parsedDate;
+            DateTime parsedTime;
+            try
+            {
+                string formattedTimePart = FormatTime(timePart);
+                parsedTime = DateTime.Parse(formattedTimePart);
+            }
+            catch (Exception)
+            {
+                // check if there are any time units in the string, if there are use that to get the time
+                var unitRegex = new Regex("(?i)(hour|minute|second)(?-i)");
+                if (unitRegex.IsMatch(text))
+                {
+                    parsedTime = GetDateForRelativeOffset(text, now);
+                }
+                else
+                {
+                    parsedTime = DateTime.Now;
+                }
+            }
+            parsedDate = now.Date + parsedTime.TimeOfDay;
             return parsedDate;
         }
 
@@ -500,7 +518,7 @@ namespace Capstone.Common
         {
             text = text.ToLower().Replace("this after noon", "afternoon").Replace("this afternoon", "afternoon").Replace("tonight", "night").Replace("after noon", "afternoon");
             // create a regex to match where the daytime words should be
-            var regex = new Regex(@"(?i)(?<=(in the |at |during the |monday |tuesday |wednesday |thursday |friday |saturday |sunday |tomorrow |this ))[a-zA-Z]{3,}(?-i)|afternoon|night");
+            var regex = new Regex(@"(?i)(?<=(in the |at |during the |monday |tuesday |wednesday |thursday |friday |saturday |sunday |tomorrow |this ))[a-zA-Z]{3,}(?-i)|afternoon|midnight|night");
             // make sure that "after noon" gets scrunched down to "afternoon" for the regex to work
             while (regex.IsMatch(text))
             {
