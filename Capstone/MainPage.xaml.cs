@@ -25,12 +25,6 @@ namespace Capstone
             // hide the main menu
             this.MenuColumn.Width = new GridLength(0);
             ActionRouter.SetUp();
-
-            // DEBUG -- uncomment this code if you want to test out the weather service.
-            //string command = "what's the weather?";
-            //Func<string, Actions.Action> foundAction = ActionRouter.GetFunctionFromCommandString(command);
-            //foundAction(command).PerformAction(this.media);
-			// END DEBUG
 			
             // prevent the application from closing when the user hits the x button. This will alarms and notifications to still trigger
             SystemNavigationManagerPreview.GetForCurrentView().CloseRequested += CloseHandle;
