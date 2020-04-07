@@ -7,6 +7,7 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Core;
 using Capstone.Common;
+using Capstone.SpeechRecognition;
 
 namespace Capstone
 {
@@ -22,7 +23,7 @@ namespace Capstone
             // hide the main menu
             this.MenuColumn.Width = new GridLength(0);
             ActionRouter.SetUp();
-			
+
             // prevent the application from closing when the user hits the x button. This will alarms and notifications to still trigger
             SystemNavigationManagerPreview.GetForCurrentView().CloseRequested += CloseHandle;
             Window.Current.SizeChanged += SizeChangedHandler;
@@ -30,6 +31,7 @@ namespace Capstone
             {
                 ActionRouter.SetUp();
             }
+            SpeechRecognitionUtils.Start(performActionFromCommandBoxText);
         }
 
         private void MenuButton_OnClick(object sender, RoutedEventArgs e)
@@ -124,5 +126,6 @@ namespace Capstone
                 TextToSpeechEngine.SpeakInflectedText(this.media, ssml);
             }
         }
+
     }
 }

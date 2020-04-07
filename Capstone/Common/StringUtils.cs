@@ -18,5 +18,7 @@
         }
 
         public static bool IsNotBlank(string ToCheck) => !IsBlank(ToCheck);
+
+        public static bool StartsWith(string ToCheck, string startsWith) => ToCheck != null && ToCheck.ToLower().StartsWith(startsWith.ToLower());
     }
 }
