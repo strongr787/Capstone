@@ -5,10 +5,7 @@ using Windows.System;
 using Windows.UI.Core.Preview;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using System;
 using Windows.UI.Core;
-using Windows.UI.Popups;
-using Capstone.Actions;
 using Capstone.Common;
 
 namespace Capstone
