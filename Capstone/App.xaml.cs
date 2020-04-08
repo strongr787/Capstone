@@ -1,5 +1,6 @@
 using Capstone.Common;
 using Captsone.SpeechRecognition;
+using Capstone.Helpers;
 using System;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
@@ -22,6 +23,7 @@ namespace Capstone
         {
             this.InitializeComponent();
             this.Suspending += OnSuspending;
+            this.EnteredBackground += (sender, args) => ExtendedExecutionHelper.RequestExtendedSessionAsync();
             StoredProcedures.CreateDatabase();
             // start the alarm tracker
             if (!AlarmAndReminderTracker.hasStarted)

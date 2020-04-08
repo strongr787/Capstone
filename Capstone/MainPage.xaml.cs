@@ -23,7 +23,6 @@ namespace Capstone
             // hide the main menu
             this.MenuColumn.Width = new GridLength(0);
             ActionRouter.SetUp();
-
             // prevent the application from closing when the user hits the x button. This will alarms and notifications to still trigger
             SystemNavigationManagerPreview.GetForCurrentView().CloseRequested += CloseHandle;
             Window.Current.SizeChanged += SizeChangedHandler;
