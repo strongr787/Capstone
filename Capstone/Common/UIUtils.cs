@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using Windows.System;
 using Windows.UI;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
@@ -46,6 +48,13 @@ namespace Capstone.Common
             {
                 CurrentPage.Frame.Navigate(DefaultPageIfCannotGoBack);
             }
+        }
+
+        public static async void MinimizeWindow()
+        {
+            IList<AppDiagnosticInfo> infos = await AppDiagnosticInfo.RequestInfoForAppAsync();
+            IList<AppResourceGroupInfo> resourceInfos = infos[0].GetResourceGroups();
+            await resourceInfos[0].StartSuspendAsync();
         }
 
     }

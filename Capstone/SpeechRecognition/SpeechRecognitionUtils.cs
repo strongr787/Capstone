@@ -9,39 +9,50 @@ using Windows.Media.SpeechRecognition;
 using Windows.System;
 using Windows.UI.Core;
 using Windows.UI.Popups;
+using Windows.UI.Xaml.Controls;
 
 namespace Capstone.SpeechRecognition
 {
     public static class SpeechRecognitionUtils
     {
         private static SpeechRecognizer recognizer;
-        private static bool started = false;
+        public static bool IsStarted { get; private set; } = false;
         // if the user has disabled the "get to know you" setting, this is the error message
         private static readonly uint HResultPrivacyStatementDeclined = 0x80045509;
+        private static readonly string activatorString = "hey bob";
+        // the text box to populate the spoken words with
+        public static TextBox commandBox;
+        private static Thread thread;
 
-        public static async void Start(Action<string> speechInputFunction)
+        public static async void Start(Action<string> speechInputFunction, TextBox box)
         {
-            if (!started)
+            if (!IsStarted)
             {
+                IsStarted = true;
+                commandBox = box;
                 recognizer = new SpeechRecognizer();
                 // compile the grammar and speech contstraings. TODO we may want to create our own grammar file. I don't know how much effort that will take up though
                 await recognizer.CompileConstraintsAsync();
+                recognizer.HypothesisGenerated += Recognizer_HypothesisGenerated;
                 SpeechRecognitionResult result = null;
 
-                Thread thread = new Thread(new ThreadStart(async () =>
+                thread = new Thread(new ThreadStart(async () =>
                 {
-                    while (true)
+                    while (IsStarted)
                     {
                         try
                         {
                             result = await recognizer.RecognizeAsync();
-                            if (result != null && StringUtils.StartsWith(result.Text, "hey bob"))
+                            if (result != null && StringUtils.StartsWith(result.Text, activatorString))
                             {
-                                await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
-                                {
-                                    speechInputFunction.Invoke(result.Text);
-                                });
+                                // clear the command box and run the command
+                                Utils.RunOnMainThread(() => speechInputFunction.Invoke(result.Text));
                             }
+                        }
+                        catch (ObjectDisposedException)
+                        {
+                            // the page was changed, or we were stopped. Either way, be sure to mark us as not started just in case
+                            IsStarted = false;
                         }
                         catch (Exception exception)
                         {
@@ -53,24 +64,37 @@ namespace Capstone.SpeechRecognition
                                                                 "have viewed the privacy policy, and 'Get To Know You' is enabled.");
                                 await message.ShowAsync();
 
-                                return;
                             }
                         }
                     }
                 }));
                 thread.IsBackground = true;
                 thread.Start();
-
-                started = true;
             }
         }
 
         public static void Stop()
         {
-            if (started)
+            if (IsStarted)
             {
+                recognizer.HypothesisGenerated -= Recognizer_HypothesisGenerated;
                 recognizer.Dispose();
-                started = false;
+                IsStarted = false;
+            }
+        }
+
+        private static void Recognizer_HypothesisGenerated(SpeechRecognizer recognizer, SpeechRecognitionHypothesisGeneratedEventArgs args)
+        {
+            if (args.Hypothesis.Text.ToLower().Contains(activatorString))
+            {
+                Utils.RunOnMainThread(() =>
+                {
+                    if (commandBox != null)
+                    {
+                        commandBox.Text = args.Hypothesis.Text;
+                    }
+                });
+
             }
         }
 
