@@ -33,6 +33,7 @@ namespace Capstone
                 ActionRouter.SetUp();
             }
             SpeechRecognitionUtils.Start(performActionFromCommandBoxText, this.CommandBox);
+            AudioPlayer.Start();
         }
 
         private void MenuButton_OnClick(object sender, RoutedEventArgs e)

@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Windows.Foundation;
+using Windows.Media.Playback;
 using Windows.Media.SpeechRecognition;
 using Windows.System;
 using Windows.UI.Core;
@@ -43,10 +45,16 @@ namespace Capstone.SpeechRecognition
                         try
                         {
                             result = await recognizer.RecognizeAsync();
-                            if (result != null && StringUtils.StartsWith(result.Text, activatorString))
+                            if (result != null && StringUtils.Contains(result.Text, activatorString))
                             {
                                 // clear the command box and run the command
-                                Utils.RunOnMainThread(() => speechInputFunction.Invoke(result.Text));
+                                Utils.RunOnMainThread(() =>
+                                {
+                                    AudioPlayer.PlaySound("bob_activate");
+                                    // give the sound enough time to play
+                                    Thread.Sleep(750);
+                                    speechInputFunction.Invoke(commandBox.Text);
+                                });
                             }
                         }
                         catch (ObjectDisposedException)
@@ -85,7 +93,7 @@ namespace Capstone.SpeechRecognition
 
         private static void Recognizer_HypothesisGenerated(SpeechRecognizer recognizer, SpeechRecognitionHypothesisGeneratedEventArgs args)
         {
-            if (args.Hypothesis.Text.ToLower().Contains(activatorString))
+            if (StringUtils.Contains(args.Hypothesis.Text, activatorString))
             {
                 Utils.RunOnMainThread(() =>
                 {
