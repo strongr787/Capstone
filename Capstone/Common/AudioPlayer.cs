@@ -1,9 +1,7 @@
-﻿using Windows.UI.Xaml.Controls;
-using System.IO;
-using Windows.Media.Playback;
+﻿using Windows.Media.Playback;
 using Windows.Media.Core;
 using System;
-using System.Threading;
+
 
 namespace Capstone.Common
 {
@@ -32,7 +30,11 @@ namespace Capstone.Common
             }
         }
 
-        public static void PlaySound(string SoundName, bool DelayThread = true)
+        /// <summary>
+        /// Plays a .wav file with the passed <paramref name="SoundName"/> in our application's /Assets/Sounds folder.
+        /// </summary>
+        /// <param name="SoundName">the name of the sound file, without the .wav extension, that you want to be played</param>
+        public static void PlaySound(string SoundName)
         {
             if (IsStarted)
             {

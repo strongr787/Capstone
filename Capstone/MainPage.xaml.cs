@@ -1,6 +1,5 @@
 ﻿using Capstone.Actions;
 using System;
-using System.Collections.Generic;
 using Windows.System;
 using Windows.UI.Core.Preview;
 using Windows.UI.Xaml;
@@ -8,7 +7,6 @@ using Windows.UI.Xaml.Controls;
 using Windows.UI.Core;
 using Capstone.Common;
 using Capstone.SpeechRecognition;
-using Windows.ApplicationModel.Activation;
 using Windows.UI.Xaml.Navigation;
 
 namespace Capstone

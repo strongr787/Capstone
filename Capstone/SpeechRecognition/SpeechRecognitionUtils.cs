@@ -1,15 +1,7 @@
 ﻿using Capstone.Common;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using Windows.Foundation;
-using Windows.Media.Playback;
 using Windows.Media.SpeechRecognition;
-using Windows.System;
-using Windows.UI.Core;
 using Windows.UI.Popups;
 using Windows.UI.Xaml.Controls;
 
@@ -26,6 +18,12 @@ namespace Capstone.SpeechRecognition
         public static TextBox commandBox;
         private static Thread thread;
 
+        /// <summary>
+        /// Starts up the speech recognizer in a background thread to listen for input speech. if speech is heard and contains "hey bob", then when the user stops speaking the resulting text is used to find and perform a corresponding action.
+        /// This method does not run if it has already started
+        /// </summary>
+        /// <param name="speechInputFunction"></param>
+        /// <param name="box"></param>
         public static async void Start(Action<string> speechInputFunction, TextBox box)
         {
             if (!IsStarted)
@@ -81,6 +79,9 @@ namespace Capstone.SpeechRecognition
             }
         }
 
+        /// <summary>
+        /// Stops the speech recognition process and disposes of it, and ends the background thread by killing the while loop inside of it
+        /// </summary>
         public static void Stop()
         {
             if (IsStarted)
@@ -91,6 +92,11 @@ namespace Capstone.SpeechRecognition
             }
         }
 
+        /// <summary>
+        /// Event handler used to display what's being heard in the main screen's text box
+        /// </summary>
+        /// <param name="recognizer"></param>
+        /// <param name="args"></param>
         private static void Recognizer_HypothesisGenerated(SpeechRecognizer recognizer, SpeechRecognitionHypothesisGeneratedEventArgs args)
         {
             if (StringUtils.Contains(args.Hypothesis.Text, activatorString))
