@@ -438,18 +438,6 @@ namespace Capstone.Common
             return voiceMemo;
         }
 
-        public static void UpdateSettings(int ID, bool IsSelected)
-        {
-            int intID = ID;
-            bool boolIsSelected = IsSelected;
-            int intIsSelected = boolIsSelected ? 1 : 0;
-            SqliteConnection conn = OpenDatabase();
-            conn.Open();
-            SqliteCommand command = conn.CreateCommand();
-            command.CommandText = $"Update TSettingOptions Set isSelected = {intIsSelected} Where settingOptionID = {intID};";
-            command.ExecuteNonQuery();
-            conn.Close();
-        }
         public static Setting QuerySetting(int ID = -1)
         {
             Setting setting = new Setting();
@@ -493,6 +481,79 @@ namespace Capstone.Common
             }
             conn.Close();
             return setting;
+        }
+
+        public static Setting QuerySettingByName(string settingName)
+        {
+            Setting setting = null;
+            using (var connection = OpenDatabase())
+            {
+                connection.Open();
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = @"SELECT TSettings.settingID, TSettings.settingDisplayName AS 'Setting Name', group_concat((TSettingOptions.settingOptionID || ':' || TSettingOptions.optionDisplayName || ':' || TSettingOptions.isSelected)) AS 'options'
+                                            FROM TSettings,TSettingOptions 
+                                            WHERE TSettings.settingID = TSettingOptions.settingID
+	                                              AND TSettings.settingDisplayName = '{DisplayName}'
+                                            GROUP BY TSettings.settingID".Replace("{DisplayName}", settingName);
+                    var reader = command.ExecuteReader();
+                    reader.Read();
+                    setting = Setting.FromDataRow(reader);
+                    reader.Close();
+                }
+            }
+            return setting;
+        }
+
+        /// <summary>
+        /// Gets all the settings from the database that are to be used for the settings screen. A setting is marked as for the settings screen if its setting name does not start with an underscore
+        /// </summary>
+        /// <returns></returns>
+        public static List<Setting> QuerySettingsForSettingScreen()
+        {
+            List<Setting> settings = new List<Setting>();
+            using (var connection = OpenDatabase())
+            {
+                connection.Open();
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = @"SELECT TSettings.settingID, TSettings.settingDisplayName AS 'Setting Name', group_concat((TSettingOptions.settingOptionID || ':' || TSettingOptions.optionDisplayName || ':' || TSettingOptions.isSelected)) AS 'options'
+                                            FROM TSettings,TSettingOptions 
+                                            WHERE TSettings.settingID = TSettingOptions.settingID
+	                                              AND TSettings.settingDisplayName NOT LIKE '\_%' ESCAPE '\'
+                                            GROUP BY TSettings.settingID";
+                    SqliteDataReader reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        settings.Add(Setting.FromDataRow(reader));
+                    }
+                    reader.Close();
+                }
+            }
+
+            return settings;
+        }
+
+        public static void SelectOption(int settingID, int selectedOptionID)
+        {
+            using (var connection = OpenDatabase())
+            {
+                connection.Open();
+                using (var resetAllOptionsCommand = connection.CreateCommand())
+                using (var selectOptionCommand = connection.CreateCommand())
+                {
+                    // first mark all options as deselected
+                    resetAllOptionsCommand.CommandText = @"UPDATE TSettingOptions
+                                                           SET isSelected = 0
+                                                           WHERE settingID = {settingID}".Replace("{settingID}", settingID.ToString());
+                    resetAllOptionsCommand.ExecuteNonQuery();
+                    // next step is to select the option with the passed id
+                    selectOptionCommand.CommandText = @"UPDATE TSettingOptions
+                                                        SET isSelected = 1
+                                                        WHERE settingOptionID = {optionID}".Replace("{optionID}", selectedOptionID.ToString());
+                    selectOptionCommand.ExecuteNonQuery();
+                }
+            }
         }
 
         public static WeatherProvider QueryWeatherProvider(string ProviderName = "")

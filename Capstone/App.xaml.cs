@@ -24,7 +24,7 @@ namespace Capstone
             this.InitializeComponent();
             this.Suspending += OnSuspending;
             this.EnteredBackground += (sender, args) => ExtendedExecutionHelper.RequestExtendedSessionAsync();
-            StoredProcedures.CreateDatabase();
+            StoredProcedures.CreateDatabase().Wait();
             // start the alarm tracker
             if (!AlarmAndReminderTracker.hasStarted)
             {
@@ -66,7 +66,15 @@ namespace Capstone
                     // When the navigation stack isn't restored navigate to the first page,
                     // configuring the new page by passing required information as a navigation
                     // parameter
-                    rootFrame.Navigate(typeof(FirstTimeSetup), e.Arguments);
+                    var passedFirstTimeSetupSetting = StoredProcedures.QuerySettingByName("_FirstTimeSetupPassed");
+                    if (passedFirstTimeSetupSetting.GetSelectedOption().DisplayName == "true")
+                    {
+                        rootFrame.Navigate(typeof(MainPage), e.Arguments);
+                    }
+                    else
+                    {
+                        rootFrame.Navigate(typeof(FirstTimeSetup), e.Arguments);
+                    }
                 }
                 // Ensure the current window is active
                 Window.Current.Activate();
