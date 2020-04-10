@@ -24,7 +24,7 @@ namespace Capstone
             this.InitializeComponent();
             this.Suspending += OnSuspending;
             this.EnteredBackground += (sender, args) => ExtendedExecutionHelper.RequestExtendedSessionAsync();
-            StoredProcedures.CreateDatabase();
+            StoredProcedures.CreateDatabase().Wait();
             // start the alarm tracker
             if (!AlarmAndReminderTracker.hasStarted)
             {
@@ -39,6 +39,7 @@ namespace Capstone
         /// <param name="e">Details about the launch request and process.</param>
         protected override async void OnLaunched(LaunchActivatedEventArgs e)
         {
+            StoredProcedures.CreateDatabase().Wait();
             Frame rootFrame = Window.Current.Content as Frame;
 
             // Do not repeat app initialization when the Window already has content,
@@ -66,12 +67,19 @@ namespace Capstone
                     // When the navigation stack isn't restored navigate to the first page,
                     // configuring the new page by passing required information as a navigation
                     // parameter
-                    rootFrame.Navigate(typeof(FirstTimeSetup), e.Arguments);
+                    var passedFirstTimeSetupSetting = StoredProcedures.QuerySettingByName("_FirstTimeSetupPassed");
+                    if (passedFirstTimeSetupSetting.GetSelectedOption().DisplayName == "true")
+                    {
+                        rootFrame.Navigate(typeof(MainPage), e.Arguments);
+                    }
+                    else
+                    {
+                        rootFrame.Navigate(typeof(FirstTimeSetup), e.Arguments);
+                    }
                 }
                 // Ensure the current window is active
                 Window.Current.Activate();
             }
-            await AudioCapturePermissions.RequestMicrophonePermission();
         }
 
         /// <summary>
