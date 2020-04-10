@@ -22,5 +22,7 @@
         public static bool StartsWith(string ToCheck, string startsWith) => ToCheck != null && ToCheck.ToLower().StartsWith(startsWith.ToLower());
 
         public static bool Contains(string MainString, string contains) => MainString != null && MainString.ToLower().Contains(contains.ToLower());
+
+        public static bool AreEqual(string a, string b) => a != null && b != null && a.ToLower().Equals(b.ToLower());
     }
 }

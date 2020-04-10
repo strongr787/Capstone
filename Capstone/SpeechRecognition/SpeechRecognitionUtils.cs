@@ -17,6 +17,8 @@ namespace Capstone.SpeechRecognition
         // the text box to populate the spoken words with
         public static TextBox commandBox;
         private static Thread thread;
+        // holds what the recognizer thinks the user is saying
+        private static string SpokenText;
 
         /// <summary>
         /// Starts up the speech recognizer in a background thread to listen for input speech. if speech is heard and contains "hey bob", then when the user stops speaking the resulting text is used to find and perform a corresponding action.
@@ -34,6 +36,8 @@ namespace Capstone.SpeechRecognition
                 // compile the grammar and speech contstraings. TODO we may want to create our own grammar file. I don't know how much effort that will take up though
                 await recognizer.CompileConstraintsAsync();
                 recognizer.HypothesisGenerated += Recognizer_HypothesisGenerated;
+                // add a half second delay for the user to have pauses in their speech
+                recognizer.ContinuousRecognitionSession.AutoStopSilenceTimeout += new TimeSpan(1_000_000); // 1,000,000 ticks = 1 second
                 SpeechRecognitionResult result = null;
 
                 thread = new Thread(new ThreadStart(async () =>
@@ -45,13 +49,22 @@ namespace Capstone.SpeechRecognition
                             result = await recognizer.RecognizeAsync();
                             if (result != null && StringUtils.Contains(result.Text, activatorString))
                             {
+                                SpokenText = result.Text;
+                                // if the result is only "hey bob", then listen again
+                                if(StringUtils.AreEqual(SpokenText, activatorString))
+                                {
+                                    result = await recognizer.RecognizeAsync();
+                                    SpokenText += " " + result.Text;
+                                }
                                 // clear the command box and run the command
                                 Utils.RunOnMainThread(() =>
                                 {
                                     AudioPlayer.PlaySound("bob_activate");
                                     // give the sound enough time to play
                                     Thread.Sleep(750);
-                                    speechInputFunction.Invoke(commandBox.Text);
+                                    speechInputFunction.Invoke(SpokenText);
+                                    // clear the spoken text variable to prevent the text box from holding old and new commands at once
+                                    SpokenText = "";
                                 });
                             }
                         }
@@ -99,13 +112,13 @@ namespace Capstone.SpeechRecognition
         /// <param name="args"></param>
         private static void Recognizer_HypothesisGenerated(SpeechRecognizer recognizer, SpeechRecognitionHypothesisGeneratedEventArgs args)
         {
-            if (StringUtils.Contains(args.Hypothesis.Text, activatorString))
+            if (StringUtils.Contains(args.Hypothesis.Text, activatorString) || StringUtils.AreEqual(SpokenText, activatorString))
             {
                 Utils.RunOnMainThread(() =>
                 {
                     if (commandBox != null)
                     {
-                        commandBox.Text = args.Hypothesis.Text;
+                        commandBox.Text = SpokenText + " " + args.Hypothesis.Text;
                     }
                 });
 
