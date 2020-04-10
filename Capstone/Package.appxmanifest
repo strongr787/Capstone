@@ -57,5 +57,6 @@
     <rescap:Capability Name="confirmAppClose"/>
     <uap3:Capability Name="backgroundMediaPlayback"/>
     <DeviceCapability Name="location"/>
+    <DeviceCapability Name="microphone"/>
   </Capabilities>
 </Package>

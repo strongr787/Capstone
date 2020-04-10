@@ -1,4 +1,5 @@
 using Capstone.Common;
+using Captsone.SpeechRecognition;
 using Capstone.Helpers;
 using System;
 using Windows.ApplicationModel;
@@ -36,7 +37,7 @@ namespace Capstone
         /// will be used such as when the application is launched to open a specific file.
         /// </summary>
         /// <param name="e">Details about the launch request and process.</param>
-        protected override void OnLaunched(LaunchActivatedEventArgs e)
+        protected override async void OnLaunched(LaunchActivatedEventArgs e)
         {
             Frame rootFrame = Window.Current.Content as Frame;
 
@@ -70,6 +71,7 @@ namespace Capstone
                 // Ensure the current window is active
                 Window.Current.Activate();
             }
+            await AudioCapturePermissions.RequestMicrophonePermission();
         }
 
         /// <summary>
@@ -95,5 +97,6 @@ namespace Capstone
             //TODO: Save application state and stop any background activity
             deferral.Complete();
         }
+
     }
 }

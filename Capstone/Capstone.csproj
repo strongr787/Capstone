@@ -135,6 +135,8 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="Common\AlarmAndReminderTracker.cs" />
+    <Compile Include="Common\AudioPlayer.cs" />
+    <Compile Include="SpeechRecognition\SpeechRecognitionUtils.cs" />
     <Compile Include="Common\StoredProcedures.cs" />
     <Compile Include="Common\DateTimeParser.cs" />
     <Compile Include="Common\StringUtils.cs" />
@@ -171,6 +173,7 @@
     <Compile Include="RemindersPage.xaml.cs">
       <DependentUpon>RemindersPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="SpeechRecognition\AudioCapturePermissions.cs" />
     <Compile Include="VoiceMemosPage.xaml.cs">
       <DependentUpon>VoiceMemosPage.xaml</DependentUpon>
     </Compile>
@@ -181,6 +184,8 @@
     </AppxManifest>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Assets\Sounds\bob_activate.wav" />
+    <Content Include="Assets\Sounds\bob_deactivate.wav" />
     <Content Include="Database\BobStoredProc.sql" />
     <Content Include="Database\InitialScript.sql" />
     <Content Include="Properties\Default.rd.xml" />
