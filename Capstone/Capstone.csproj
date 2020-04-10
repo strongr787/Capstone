@@ -173,6 +173,9 @@
     <Compile Include="RemindersPage.xaml.cs">
       <DependentUpon>RemindersPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="SettingsPage.xaml.cs">
+      <DependentUpon>SettingsPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SpeechRecognition\AudioCapturePermissions.cs" />
     <Compile Include="VoiceMemosPage.xaml.cs">
       <DependentUpon>VoiceMemosPage.xaml</DependentUpon>
@@ -229,6 +232,10 @@
     <Page Include="RemindersPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="SettingsPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="VoiceMemosPage.xaml">
       <SubType>Designer</SubType>

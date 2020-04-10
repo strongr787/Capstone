@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Windows.Storage;
 
 namespace Capstone.Common
 {
@@ -12,17 +13,27 @@ namespace Capstone.Common
     {
         public static async Task CreateDatabase()
         {
-            string targetDbPath = Path.Combine(Windows.Storage.ApplicationData.Current.LocalFolder.Path, "Database\\BobDB.db");
+            StorageFolder localStateFolder = ApplicationData.Current.LocalFolder;
+            StorageFolder createdFolder;
+            if (!Directory.Exists(Path.Combine(localStateFolder.Path, "Database")))
+            {
+                createdFolder = await localStateFolder.CreateFolderAsync("Database");
+            }
+            else
+            {
+                createdFolder = await localStateFolder.GetFolderAsync("Database");
+            }
+            string targetDbPath = Path.Combine(createdFolder.Path, "BobDB.db");
             if (!File.Exists(targetDbPath))
             {
-                var installedLocation = Windows.ApplicationModel.Package.Current.InstalledLocation;
-                using (var input = await installedLocation.OpenStreamForReadAsync("Assets\\BobDB.db"))
-                {
-                    using (var output = await Windows.Storage.ApplicationData.Current.LocalFolder.OpenStreamForWriteAsync("Database\\BobDB.db", Windows.Storage.CreationCollisionOption.FailIfExists))
-                    {
-                        await input.CopyToAsync(output);
-                    }
-                }
+                SqliteConnection connection = new SqliteConnection($"Data Source={targetDbPath};");
+                connection.Open();
+                string initialScript = File.ReadAllText($"{Windows.ApplicationModel.Package.Current.InstalledLocation.Path}\\Database\\InitialScript.sql");
+                SqliteCommand command = connection.CreateCommand();
+                command.CommandText = initialScript;
+                command.ExecuteNonQuery();
+                command.Dispose();
+                connection.Close();
             }
         }
         public static SqliteConnection OpenDatabase()

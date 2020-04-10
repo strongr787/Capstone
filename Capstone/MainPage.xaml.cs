@@ -8,6 +8,7 @@ using Windows.UI.Core;
 using Capstone.Common;
 using Capstone.SpeechRecognition;
 using Windows.UI.Xaml.Navigation;
+using Capstone.Models;
 
 namespace Capstone
 {
@@ -32,6 +33,8 @@ namespace Capstone
             }
             SpeechRecognitionUtils.Start(performActionFromCommandBoxText, this.CommandBox);
             AudioPlayer.Start();
+            // if the user has elected to have speech recognition turned on, then request for microphone permissions
+            this.RequestMicrophoneAcessIfUserWantsVoiceDetection();
         }
 
         private void MenuButton_OnClick(object sender, RoutedEventArgs e)
@@ -50,7 +53,7 @@ namespace Capstone
 
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
-            // TODO navigate to settings screen (this.Frame.Navigate(typeof(screenName)))
+            this.Frame.Navigate(typeof(SettingsPage));
         }
 
         private void RemindersButton_Click(object sender, RoutedEventArgs e)
@@ -132,6 +135,16 @@ namespace Capstone
             base.OnNavigatedFrom(e);
             SpeechRecognitionUtils.Stop();
             SpeechRecognitionUtils.commandBox = null;
+		}
+		
+        private void RequestMicrophoneAcessIfUserWantsVoiceDetection()
+        {
+            Setting voiceRecognitionSetting = StoredProcedures.QuerySettingByName("Voice Activation");
+            SettingOption chosenSetting = voiceRecognitionSetting.GetSelectedOption();
+            if (chosenSetting != null && chosenSetting.DisplayName == "Enabled")
+            {
+                AudioCapturePermissions.RequestMicrophonePermission();
+            }
         }
     }
 }
