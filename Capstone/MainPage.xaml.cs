@@ -9,6 +9,7 @@ using Capstone.Common;
 using Capstone.SpeechRecognition;
 using Windows.UI.Xaml.Navigation;
 using Capstone.Models;
+using Captsone.SpeechRecognition;
 
 namespace Capstone
 {
@@ -31,7 +32,7 @@ namespace Capstone
             {
                 ActionRouter.SetUp();
             }
-            SpeechRecognitionUtils.Start(performActionFromCommandBoxText, this.CommandBox);
+
             AudioPlayer.Start();
             // if the user has elected to have speech recognition turned on, then request for microphone permissions
             this.RequestMicrophoneAcessIfUserWantsVoiceDetection();
@@ -135,15 +136,21 @@ namespace Capstone
             base.OnNavigatedFrom(e);
             SpeechRecognitionUtils.Stop();
             SpeechRecognitionUtils.commandBox = null;
-		}
-		
-        private void RequestMicrophoneAcessIfUserWantsVoiceDetection()
+        }
+
+        private async void RequestMicrophoneAcessIfUserWantsVoiceDetection()
         {
             Setting voiceRecognitionSetting = StoredProcedures.QuerySettingByName("Voice Activation");
             SettingOption chosenSetting = voiceRecognitionSetting.GetSelectedOption();
             if (chosenSetting != null && chosenSetting.DisplayName == "Enabled")
             {
-                AudioCapturePermissions.RequestMicrophonePermission();
+                if (await AudioCapturePermissions.RequestMicrophonePermission())
+                {
+                    SpeechRecognitionUtils.Start(performActionFromCommandBoxText, this.CommandBox);
+                } else
+                {
+                    TextToSpeechEngine.SpeakText(this.media, "Sorry, but something went wrong with setting up your microphone. You cannot use me through speech, but you can still use the command bar at the bottom of the screen.");
+                }
             }
         }
     }
