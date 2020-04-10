@@ -173,7 +173,7 @@ namespace Capstone
             string greetingText = "Hi, I'm Bob, your new digital assistant! It's nice to meet you! To get started, try saying \"Hey bob, what can you do?\" or type \"What can you do?\" in the command box down below.";
             // write the greeting text to the dynamic area
             UIUtils.ShowMessageOnRelativePanel(this.DynamicArea, greetingText);
-            string ssmlText = new SSMLBuilder().Add(greetingText).Build();
+            string ssmlText = new SSMLBuilder().Prosody(greetingText, contour: "(5%, +20%) (40%, -15%)").Build();
             TextToSpeechEngine.SpeakInflectedText(this.media, ssmlText);
         }
     }
