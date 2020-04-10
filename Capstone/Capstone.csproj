@@ -125,6 +125,7 @@
     <Compile Include="Actions\VoiceMemoAction.cs" />
     <Compile Include="Actions\WeatherAction.cs" />
     <Compile Include="Actions\WebsiteSearchAction.cs" />
+    <Compile Include="Actions\WhatCanYouDoAction.cs" />
     <Compile Include="AlarmsFormPage.xaml.cs">
       <DependentUpon>AlarmsFormPage.xaml</DependentUpon>
     </Compile>

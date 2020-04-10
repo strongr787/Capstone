@@ -200,13 +200,20 @@ INSERT INTO "TWeatherProviderURLS" ("weatherProviderURLID", "weatherProviderID",
 INSERT INTO TSettings(settingDisplayName)
 VALUES				 ("Search Engine")
 ,					 ("Voice Activation")
-,					 ("_FirstTimeSetupPassed"); -- it starts with an underscore, which means it should not display on a UI
+,					 ("_FirstTimeSetupPassed") -- it starts with an underscore, which means it should not display on a UI
+,					 ("_ToldUserHowToUseBob");
 
 INSERT INTO TSettingOptions(settingID, optionDisplayName, isSelected)
+							-- search engine
 VALUES					   (1, "Google", 0)
 ,						   (1, "Duck Duck Go", 0)
 ,						   (1, "Bing", 0)
+						   -- voice activation
 ,						   (2, "Enabled", 0)
 ,						   (2, "Disabled", 0)
+						   -- passed first time setup
 ,						   (3, "true", 0)
-,						   (3, "false", 1);
+,						   (3, "false", 1)
+					       -- has told the user how to use bob
+,						   (4, "true", 0)
+,						   (4, "false", 1);
