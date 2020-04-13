@@ -277,5 +277,16 @@ namespace UnitTests
             var actualDate = DateTimeParser.ParseDateTimeFromText(inputText, today);
             Assert.AreEqual(expectedDate, actualDate);
         }
+
+        [TestMethod]
+        public void TestParseDateTimeFromTextShiftsTimeToFutureIfPassed()
+        {
+            var inputString = "set an alarm for 5";
+            // since AM is assumed if PM isn't indicated, we need to ensure that an extra 24 hours is applied to a time that has passed 
+            var startingDate = new DateTime(2020, 1, 1, 17, 0, 0);
+            var expectedDate = new DateTime(2020, 1, 2, 5, 0, 0);
+            var actualDate = DateTimeParser.ParseDateTimeFromText(inputString, startingDate);
+            Assert.AreEqual(expectedDate, actualDate);
+        }
     }
 }

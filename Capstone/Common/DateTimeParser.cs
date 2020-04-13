@@ -287,6 +287,12 @@ namespace Capstone.Common
                 if (!StringUtils.Contains(timePart, "am") && !StringUtils.Contains(timePart, "pm"))
                 {
                     time = time.AddHours(12);
+                    // if time is still less than now, then add another 12 hours
+                    if(now.TimeOfDay >= time.TimeOfDay)
+                    {
+                        time = time.AddHours(12);
+                        dayOffset = 1;
+                    }
                 }
                 else
                 {
