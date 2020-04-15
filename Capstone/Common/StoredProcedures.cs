@@ -683,6 +683,28 @@ namespace Capstone.Common
             return searchEngine;
         }
 
+        /// <summary>
+        /// Pulls a random joke from the database and returns it
+        /// </summary>
+        /// <returns></returns>
+        public static Joke QueryRandomJoke()
+        {
+            Joke joke = null;
+            using (SqliteConnection connection = OpenDatabase())
+            {
+                connection.Open();
+                using (SqliteCommand command = connection.CreateCommand())
+                {
+                    command.CommandText = "SELECT * FROM TJokes WHERE jokeID IN (SELECT jokeID FROM TJokes ORDER BY RANDOM() LIMIT 1)";
+                    SqliteDataReader reader = command.ExecuteReader();
+                    reader.Read();
+                    joke = Joke.FromDataRow(reader);
+                    reader.Close();
+                }
+            }
+            return joke;
+        }
+
         private static string EscapeSingleTicks(string text)
         {
             var tickRegex = new Regex("'");
