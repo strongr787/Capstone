@@ -11,6 +11,7 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
 
+
 namespace Capstone.Common
 {
     class AudioRecorder
@@ -19,12 +20,11 @@ namespace Capstone.Common
         public MediaElement playbackMediaElement = new MediaElement();
         private MediaCapture _mediaCapture;
         private InMemoryRandomAccessStream _memoryBuffer;
+        private static IRandomAccessStream stream;
+
         private string _fileName;
-        
         public bool IsRecording { get; set; }
         
-        
-
         public async void Record()
         {
             if (IsRecording)
@@ -32,21 +32,15 @@ namespace Capstone.Common
                 throw new InvalidOperationException("Recording already in progress!");
             }
 
-            if (_memoryBuffer != null)
-            {
-                _memoryBuffer.Dispose();
-            }
             _memoryBuffer = new InMemoryRandomAccessStream();
-            if (_mediaCapture != null)
-            {
-                _mediaCapture.Dispose();
-            }
 
+            DisposeMedia();
             MediaCaptureInitializationSettings settings =
             new MediaCaptureInitializationSettings
             {
                 StreamingCaptureMode = StreamingCaptureMode.Audio
             };
+           
             _mediaCapture = new MediaCapture();
             await _mediaCapture.InitializeAsync(settings);
             await _mediaCapture.StartRecordToStreamAsync(
@@ -55,12 +49,11 @@ namespace Capstone.Common
         }
 
         public async void StopRecording()
-        {
+        {   
             await _mediaCapture.StopRecordAsync();
+            DisposeMedia();
             IsRecording = false;
-      
         }
-
 
         public async Task<string> SaveAudioToFile(string fileName)
         {
@@ -73,25 +66,25 @@ namespace Capstone.Common
               await storageFile.OpenAsync(FileAccessMode.ReadWrite))
             {
                 await RandomAccessStream.CopyAndCloseAsync(
-                  audioStream.GetInputStreamAt(0), fileStream.GetOutputStreamAt(0));
+                audioStream.GetInputStreamAt(0), fileStream.GetOutputStreamAt(0));
                 await audioStream.FlushAsync();
                 audioStream.Dispose();
             }
+            DisposeMemoryBuffer();
             return this._fileName;
         }
 
-        public async Task PlayFromDisk(CoreDispatcher dispatcher, string fileName)
+        public async Task PlayFromDisk(string fileName)
         {
-            await dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () =>
-            {
+            DisposeStream();
 
-                
+            Utils.RunOnMainThread(async() =>
+            {
                 StorageFolder storageFolder = Package.Current.InstalledLocation;
                 StorageFile storageFile = await storageFolder.GetFileAsync(fileName);
-                IRandomAccessStream stream = await storageFile.OpenAsync(FileAccessMode.Read);
+                stream = await storageFile.OpenAsync(FileAccessMode.Read);
                 playbackMediaElement.SetSource(stream, storageFile.FileType);
                 playbackMediaElement.Play();
- 
             });
         }
 
@@ -104,10 +97,35 @@ namespace Capstone.Common
                 await fileToDelete.DeleteAsync();
             }
         }
-
+        
+        public void DisposeMemoryBuffer()
+        {
+            if(_memoryBuffer != null)
+            {
+                _memoryBuffer.Dispose();
+            }    
+        }
         public void DisposeMedia()
         {
-            _mediaCapture.Dispose();
+            if(_mediaCapture != null)
+            {
+                _mediaCapture.Dispose();
+            }      
+        }
+       public void DisposeStream()
+        {
+            if(stream != null)
+            {
+                stream.Dispose();
+            }  
+        }
+
+        public void StopPlaybackMedia()
+        {
+            if(playbackMediaElement != null)
+            {
+                playbackMediaElement.Stop();
+            }
         }
 
         public async Task<int> AudioDuration(string fileName)
@@ -117,23 +135,19 @@ namespace Capstone.Common
             MusicProperties properties = await audioFile.Properties.GetMusicPropertiesAsync();
             TimeSpan myTrackDuration = properties.Duration;
             duration = myTrackDuration.Seconds;
-
-
             return duration;
         }
 
         public DateTime DateRecorded()
         {
             DateTime today = DateTime.Now;
-           
             return Convert.ToDateTime(today.ToShortDateString());
         }
 
-        public DateTime RecordTime ()
+        public DateTime RecordTime()
         {
             DateTime today = DateTime.Now;
             return Convert.ToDateTime(today.ToShortTimeString());
-
         }
     }
 }

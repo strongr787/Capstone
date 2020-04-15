@@ -63,7 +63,10 @@ namespace Capstone
 
             if(goToMainPage)
             {
-                _audioRecorder.playbackMediaElement.Stop();
+                _audioRecorder.StopPlaybackMedia();
+                _audioRecorder.DisposeStream();
+                _audioRecorder.DisposeMedia();
+                _audioRecorder.DisposeMemoryBuffer();
                 UIUtils.GoToMainPage(this);
             }
             
@@ -172,18 +175,11 @@ namespace Capstone
 
         private async void PlayVoiceMemo(VoiceMemo VoiceMemoToPlay)
         {
-            
             //don't let playback if in recording session 
-            //TODO prevent another playback when one is playing
             if (!_audioRecorder.IsRecording )
             {
-                
-                await this._audioRecorder.PlayFromDisk(Dispatcher, VoiceMemoToPlay.FileName );
-               
+                await this._audioRecorder.PlayFromDisk(VoiceMemoToPlay.FileName );
             }
-            
-
-
         }
 
         private async Task DeleteVoiceMemoAsync(VoiceMemo VoiceMemoToDelete)
@@ -194,6 +190,10 @@ namespace Capstone
 
             if (deleteVoiceMemo)
             {
+                //stop playing an dispose stream
+                _audioRecorder.StopPlaybackMedia();
+                _audioRecorder.DisposeStream();
+
                 //delete file and from database
                 this._audioRecorder.DeleteFile(VoiceMemoToDelete.FileName);
                 StoredProcedures.DeleteVoiceNote(VoiceMemoToDelete.VoiceMemoID);
@@ -205,10 +205,6 @@ namespace Capstone
                 await Task.Delay(100);
                 Frame.Navigate(this.GetType());
             }
-
-
-
-
         }
 
         private async void Button_ClickDelete(object sender, RoutedEventArgs e)
@@ -222,12 +218,9 @@ namespace Capstone
             {
                 //stop the recording and go back to main voice notes screen
                 _audioRecorder.DisposeMedia();
+                _audioRecorder.DisposeMemoryBuffer();
+                _audioRecorder.DisposeStream();
                 Frame.Navigate(this.GetType());
-
-            }
-            else
-            {
-                //do nothing
             }
         }
 
@@ -235,17 +228,13 @@ namespace Capstone
         {
             //toggle pause/play buttons
             OnStartRecordingToggle();
-            
-             this._audioRecorder.Record();
-           
+            this._audioRecorder.Record(); 
         }
         private void Button_ClickStop(object sender, RoutedEventArgs e)
         {
             //toggle buttons
             OnStopRecordingToggle();
-
-            this._audioRecorder.StopRecording();
-            
+            this._audioRecorder.StopRecording();      
         }
 
         private async void Button_ClickSave(object sender, RoutedEventArgs e)
@@ -270,10 +259,8 @@ namespace Capstone
                 Frame.Navigate(this.GetType());
             }else
             {
-                 DisplayEnterNameDialog();
-
+                DisplayEnterNameDialog();
             }
-           
         }
 
         private void OnStartRecordingToggle()
@@ -303,16 +290,7 @@ namespace Capstone
             };
 
             ContentDialogResult result = await deleteFileDialog.ShowAsync();
-            if (result == ContentDialogResult.Primary)
-            {
-
-                return true;
-                
-            }
-            else
-            {
-                return false;
-            }
+            return result == ContentDialogResult.Primary;
         }
 
         private async Task<bool> DisplayGoBackToMainPageDialog()
@@ -326,16 +304,7 @@ namespace Capstone
             };
 
             ContentDialogResult result = await goToMainPageDialog.ShowAsync();
-            if (result == ContentDialogResult.Primary)
-            {
-
-                return true;
-
-            }
-            else
-            {
-                return false;
-            }
+            return result == ContentDialogResult.Primary;
         }
 
         private async void DisplayEnterNameDialog()
@@ -352,13 +321,7 @@ namespace Capstone
 
         private bool ValidateFileName()
         {
-            if (displayName.Text.Length > 0)
-            {
-                return true;
-            }else
-            {
-                return false;
-            }
+            return StringUtils.IsNotBlank(displayName.Text);
         }
 
     }
