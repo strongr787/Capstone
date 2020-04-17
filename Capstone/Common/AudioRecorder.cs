@@ -1,13 +1,11 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
-using Windows.ApplicationModel;
 using Windows.Media.Capture;
 using Windows.Media.MediaProperties;
 using Windows.Storage;
 using Windows.Storage.FileProperties;
 using Windows.Storage.Streams;
-using Windows.UI.Core;
-using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
 
@@ -55,12 +53,26 @@ namespace Capstone.Common
             IsRecording = false;
         }
 
-        public async Task<string> SaveAudioToFile(string fileName)
+        public async Task<string> SaveAudioToFile()
         {
+            string dateToday =  DateTime.Now.ToString("yyyy-MM-dd");
+            string  ticks = DateTime.Now.Ticks.ToString();
+            string mp3 = ".mp3";
+            string fileName = String.Format("record_{0}_{1}{2}",
+                         dateToday, ticks, mp3);
+            StorageFolder localStateFolder = ApplicationData.Current.LocalFolder;
+            StorageFolder storageFolder;
+            if (!Directory.Exists(Path.Combine(localStateFolder.Path, "VoiceNotes")))
+            {
+                storageFolder = await localStateFolder.CreateFolderAsync("VoiceNotes");
+            }
+            else
+            {
+                storageFolder = await localStateFolder.GetFolderAsync("VoiceNotes");
+            }
             IRandomAccessStream audioStream = _memoryBuffer.CloneStream();
-            StorageFolder storageFolder = Package.Current.InstalledLocation;
             StorageFile storageFile = await storageFolder.CreateFileAsync(
-              fileName + ".mp3", CreationCollisionOption.GenerateUniqueName);
+               fileName, CreationCollisionOption.GenerateUniqueName);
             this._fileName = storageFile.Name;
             using (IRandomAccessStream fileStream =
               await storageFile.OpenAsync(FileAccessMode.ReadWrite))
@@ -71,6 +83,7 @@ namespace Capstone.Common
                 audioStream.Dispose();
             }
             DisposeMemoryBuffer();
+
             return this._fileName;
         }
 
@@ -80,7 +93,7 @@ namespace Capstone.Common
 
             Utils.RunOnMainThread(async() =>
             {
-                StorageFolder storageFolder = Package.Current.InstalledLocation;
+                StorageFolder storageFolder = await ApplicationData.Current.LocalFolder.GetFolderAsync("VoiceNotes");
                 StorageFile storageFile = await storageFolder.GetFileAsync(fileName);
                 stream = await storageFile.OpenAsync(FileAccessMode.Read);
                 playbackMediaElement.SetSource(stream, storageFile.FileType);
@@ -91,7 +104,8 @@ namespace Capstone.Common
 
         public async void DeleteFile(string file)
         {
-            StorageFile fileToDelete = await Package.Current.InstalledLocation.GetFileAsync(file);
+            StorageFolder storageFolder = await ApplicationData.Current.LocalFolder.GetFolderAsync("VoiceNotes");
+            StorageFile fileToDelete = await storageFolder.GetFileAsync(file);
             if (fileToDelete != null)
             {
                 await fileToDelete.DeleteAsync();
@@ -128,10 +142,11 @@ namespace Capstone.Common
             }
         }
 
-        public async Task<int> AudioDuration(string fileName)
+        public async Task<int> GetAudioDuration(string fileName)
         {
             int duration = 0;
-            StorageFile audioFile = await Windows.ApplicationModel.Package.Current.InstalledLocation.GetFileAsync(fileName);
+            StorageFolder storageFolder = await ApplicationData.Current.LocalFolder.GetFolderAsync("VoiceNotes");
+            StorageFile audioFile = await storageFolder.GetFileAsync(fileName);
             MusicProperties properties = await audioFile.Properties.GetMusicPropertiesAsync();
             TimeSpan myTrackDuration = properties.Duration;
             duration = myTrackDuration.Seconds;

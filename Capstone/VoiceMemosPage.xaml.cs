@@ -10,10 +10,7 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Text;
 using System;
 using Windows.UI.ViewManagement;
-using System.Diagnostics;
-using Windows.Storage.FileProperties;
 using System.Threading.Tasks;
-
 
 namespace Capstone
 {
@@ -202,7 +199,6 @@ namespace Capstone
                 this.VoiceMemos = ReadVoiceMemosFromDatabase();
                 this.PopulateListOfVoiceMemos();
 
-                await Task.Delay(100);
                 Frame.Navigate(this.GetType());
             }
         }
@@ -246,16 +242,14 @@ namespace Capstone
                 //set values
                 CreateVoiceMemo.DisplayName = displayName.Text;
                 //unfortunately, we don't know the file name for sure until this is ran
-                CreateVoiceMemo.FileName = await this._audioRecorder.SaveAudioToFile(CreateVoiceMemo.DisplayName);
-                CreateVoiceMemo.FullFilePath = Windows.ApplicationModel.Package.Current.InstalledLocation.Path;
-                CreateVoiceMemo.RecordingDuration = await _audioRecorder.AudioDuration(CreateVoiceMemo.FileName);
+                CreateVoiceMemo.FileName = await this._audioRecorder.SaveAudioToFile();
+                CreateVoiceMemo.FullFilePath = $"{Windows.ApplicationModel.Package.Current.InstalledLocation.Path}\\VoiceNotes";
+                CreateVoiceMemo.RecordingDuration = await _audioRecorder.GetAudioDuration(CreateVoiceMemo.FileName);
                 CreateVoiceMemo.DateRecorded = _audioRecorder.DateRecorded();
                 DateTime timeRecorded = _audioRecorder.RecordTime();
                 
                 StoredProcedures.CreateVoiceNote(CreateVoiceMemo.FileName, CreateVoiceMemo.DisplayName, CreateVoiceMemo.RecordingDuration, CreateVoiceMemo.FullFilePath, CreateVoiceMemo.DateRecorded, timeRecorded);
                 
-
-                await Task.Delay(100);
                 Frame.Navigate(this.GetType());
             }else
             {
