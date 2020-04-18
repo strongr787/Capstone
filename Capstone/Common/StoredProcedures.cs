@@ -436,38 +436,23 @@ namespace Capstone.Common
             }
             return voiceMemos;
         }
-        public static VoiceMemo QueryVoiceMemo(int ID = -1)
-        {
-            VoiceMemo voiceMemo = new VoiceMemo();
-            string intID;
-            if (ID == -1)
-            {
-                intID = "null";
-            }
-            else
-            {
-                intID = ID.ToString();
-            }
 
-            SqliteConnection conn = OpenDatabase();
-            conn.Open();
-            SqliteCommand command = conn.CreateCommand();
-            command.CommandText = $"Select voiceMemoID, fileName, displayName, recordingDuration, filePath, recordDate, recordTime From TVoiceMemos Where voiceMemoID = COALESCE({intID}, voiceMemoID);";
-            using (SqliteDataReader reader = command.ExecuteReader())
+        public static VoiceMemo QueryLatestVoiceMemo()
+        {
+            VoiceMemo memo = new VoiceMemo();
+            using (SqliteConnection connection = OpenDatabase())
             {
-                while (reader.Read())
+                connection.Open();
+                using (SqliteCommand command = connection.CreateCommand())
                 {
-                    int intVoiceMemoID = int.Parse(reader["voiceMemoID"].ToString());
-                    voiceMemo.VoiceMemoID = intVoiceMemoID;
-                    voiceMemo.FileName = reader["fileName"].ToString();
-                    voiceMemo.DisplayName = reader["displayName"].ToString();
-                    voiceMemo.RecordingDuration = (int)reader["recordingDuration"];
-                    voiceMemo.FullFilePath = reader["filePath"].ToString();
-                    voiceMemo.DateRecorded = (DateTime)reader["recordDate"];
+                    command.CommandText = "SELECT * FROM TVoiceMemos WHERE voiceMemoID = (SELECT MAX(voiceMemoID) From TVoiceMemos)";
+                    SqliteDataReader reader = command.ExecuteReader();
+                    reader.Read();
+                    memo = VoiceMemo.FromDataRow(reader);
+                    reader.Close();
                 }
             }
-            conn.Close();
-            return voiceMemo;
+            return memo;
         }
 
         public static Setting QuerySetting(int ID = -1)

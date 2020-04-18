@@ -12,7 +12,7 @@ using Windows.UI.Xaml.Controls;
 
 namespace Capstone.Common
 {
-    class AudioRecorder
+    public class AudioRecorder
     {
 
         public MediaElement playbackMediaElement = new MediaElement();
@@ -22,7 +22,7 @@ namespace Capstone.Common
 
         private string _fileName;
         public bool IsRecording { get; set; }
-        
+
         public async void Record()
         {
             if (IsRecording)
@@ -38,7 +38,7 @@ namespace Capstone.Common
             {
                 StreamingCaptureMode = StreamingCaptureMode.Audio
             };
-           
+
             _mediaCapture = new MediaCapture();
             await _mediaCapture.InitializeAsync(settings);
             await _mediaCapture.StartRecordToStreamAsync(
@@ -47,19 +47,24 @@ namespace Capstone.Common
         }
 
         public async void StopRecording()
-        {   
+        {
             await _mediaCapture.StopRecordAsync();
             DisposeMedia();
             IsRecording = false;
         }
 
+        /// <summary>
+        /// Saves the audio to a file in our local state folder
+        /// </summary>
+        /// <returns>the saved file's name</returns>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="ArgumentNullException"></exception>
         public async Task<string> SaveAudioToFile()
         {
-            string dateToday =  DateTime.Now.ToString("yyyy-MM-dd");
-            string  ticks = DateTime.Now.Ticks.ToString();
+            string dateToday = DateTime.Now.ToString("yyyy-MM-dd");
+            string ticks = DateTime.Now.Ticks.ToString();
             string mp3 = ".mp3";
-            string fileName = String.Format("record_{0}_{1}{2}",
-                         dateToday, ticks, mp3);
+            string fileName = String.Format("record_{0}_{1}{2}", dateToday, ticks, mp3);
             StorageFolder localStateFolder = ApplicationData.Current.LocalFolder;
             StorageFolder storageFolder;
             if (!Directory.Exists(Path.Combine(localStateFolder.Path, "VoiceNotes")))
@@ -71,14 +76,11 @@ namespace Capstone.Common
                 storageFolder = await localStateFolder.GetFolderAsync("VoiceNotes");
             }
             IRandomAccessStream audioStream = _memoryBuffer.CloneStream();
-            StorageFile storageFile = await storageFolder.CreateFileAsync(
-               fileName, CreationCollisionOption.GenerateUniqueName);
+            StorageFile storageFile = await storageFolder.CreateFileAsync(fileName, CreationCollisionOption.GenerateUniqueName);
             this._fileName = storageFile.Name;
-            using (IRandomAccessStream fileStream =
-              await storageFile.OpenAsync(FileAccessMode.ReadWrite))
+            using (IRandomAccessStream fileStream = await storageFile.OpenAsync(FileAccessMode.ReadWrite))
             {
-                await RandomAccessStream.CopyAndCloseAsync(
-                audioStream.GetInputStreamAt(0), fileStream.GetOutputStreamAt(0));
+                await RandomAccessStream.CopyAndCloseAsync(audioStream.GetInputStreamAt(0), fileStream.GetOutputStreamAt(0));
                 await audioStream.FlushAsync();
                 audioStream.Dispose();
             }
@@ -91,7 +93,7 @@ namespace Capstone.Common
         {
             DisposeStream();
 
-            Utils.RunOnMainThread(async() =>
+            Utils.RunOnMainThread(async () =>
             {
                 StorageFolder storageFolder = await ApplicationData.Current.LocalFolder.GetFolderAsync("VoiceNotes");
                 StorageFile storageFile = await storageFolder.GetFileAsync(fileName);
@@ -111,32 +113,32 @@ namespace Capstone.Common
                 await fileToDelete.DeleteAsync();
             }
         }
-        
+
         public void DisposeMemoryBuffer()
         {
-            if(_memoryBuffer != null)
+            if (_memoryBuffer != null)
             {
                 _memoryBuffer.Dispose();
-            }    
+            }
         }
         public void DisposeMedia()
         {
-            if(_mediaCapture != null)
+            if (_mediaCapture != null)
             {
                 _mediaCapture.Dispose();
-            }      
+            }
         }
-       public void DisposeStream()
+        public void DisposeStream()
         {
-            if(stream != null)
+            if (stream != null)
             {
                 stream.Dispose();
-            }  
+            }
         }
 
         public void StopPlaybackMedia()
         {
-            if(playbackMediaElement != null)
+            if (playbackMediaElement != null)
             {
                 playbackMediaElement.Stop();
             }
@@ -153,13 +155,13 @@ namespace Capstone.Common
             return duration;
         }
 
-        public DateTime DateRecorded()
+        public DateTime GetDateRecorded()
         {
             DateTime today = DateTime.Now;
             return Convert.ToDateTime(today.ToShortDateString());
         }
 
-        public DateTime RecordTime()
+        public DateTime GetTimeRecorded()
         {
             DateTime today = DateTime.Now;
             return Convert.ToDateTime(today.ToShortTimeString());

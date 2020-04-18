@@ -39,9 +39,12 @@ namespace Capstone.Actions
         {
             var voiceNoteDict = new Dictionary<string, dynamic>();
             Func<string, Action> recordVoiceNote = (commandText) => new VoiceMemoAction(commandText);
-            voiceNoteDict.Add("Record", recordVoiceNote);
-            voiceNoteDict.Add("Take", recordVoiceNote);
-            actionTree.Add("Voice", voiceNoteDict);
+            voiceNoteDict.Add("note", recordVoiceNote);
+            voiceNoteDict.Add("record", recordVoiceNote);
+            voiceNoteDict.Add("recording", recordVoiceNote);
+            actionTree.Add("voice", voiceNoteDict);
+            actionTree.Add("record", voiceNoteDict);
+            actionTree.Add("recording", voiceNoteDict);
         }
 
         private static void SetUpInternetSearchBranches()
