@@ -120,6 +120,7 @@
     <Compile Include="Actions\ActionRouter.cs" />
     <Compile Include="Actions\AlarmAction.cs" />
     <Compile Include="Actions\DirectionsAction.cs" />
+    <Compile Include="Actions\JokeAction.cs" />
     <Compile Include="Actions\ReminderAction.cs" />
     <Compile Include="Actions\TimeAction.cs" />
     <Compile Include="Actions\VoiceMemoAction.cs" />
@@ -137,6 +138,7 @@
     </Compile>
     <Compile Include="Common\AlarmAndReminderTracker.cs" />
     <Compile Include="Common\AudioPlayer.cs" />
+    <Compile Include="Models\Joke.cs" />
     <Compile Include="Common\AudioRecorder.cs" />
     <Compile Include="SpeechRecognition\SpeechRecognitionUtils.cs" />
     <Compile Include="Common\StoredProcedures.cs" />
