@@ -415,6 +415,27 @@ namespace Capstone.Common
             conn.Close();
         }
 
+
+        public static List<VoiceMemo> QueryAllVoiceMemos()
+        {
+            List<VoiceMemo> voiceMemos = new List<VoiceMemo>();
+            string query = @"Select voiceMemoID, fileName, displayName, recordingDuration, filePath, recordDate, recordTime From TVoiceMemos
+                            ORDER BY recordDate, recordTime;";
+            using (SqliteConnection connection = OpenDatabase())
+            {
+                connection.Open();
+                SqliteCommand command = connection.CreateCommand();
+                command.CommandText = query;
+                using (SqliteDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        voiceMemos.Add(VoiceMemo.FromDataRow(reader));
+                    }
+                }
+            }
+            return voiceMemos;
+        }
         public static VoiceMemo QueryVoiceMemo(int ID = -1)
         {
             VoiceMemo voiceMemo = new VoiceMemo();
