@@ -140,6 +140,7 @@
     <Compile Include="Common\AudioPlayer.cs" />
     <Compile Include="Models\Joke.cs" />
     <Compile Include="Common\AudioRecorder.cs" />
+    <Compile Include="Helpers\VoiceMemoUIHelper.cs" />
     <Compile Include="SpeechRecognition\SpeechRecognitionUtils.cs" />
     <Compile Include="Common\StoredProcedures.cs" />
     <Compile Include="Common\DateTimeParser.cs" />
