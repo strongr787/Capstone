@@ -217,3 +217,19 @@ VALUES					   (1, "Google", 0)
 					       -- has told the user how to use bob
 ,						   (4, "true", 0)
 ,						   (4, "false", 1);
+
+
+
+--searchable websites
+INSERT INTO "TSearchableWebsites" ("searchableWebsitesID", "searchableWebsiteName", "searchableWebsiteBaseURL", "searchableWebsiteQueryString") 
+VALUES ('1', 'Google', 'https://google.com', '/search?q='),
+		('2', 'Bing', 'https://bing.com', '/search?q='),
+		('3', 'DuckDuckGo', 'https://duckduckgo.com', '/?q='),
+		('4', 'Amazon', 'https://amazon.com', '/s?k='),
+		('5', 'Youtube', 'https://www.youtube.com', '/results?search_query='),
+		('6', 'Walmart', 'https://www.walmart.com', '/search/?query=');
+
+
+
+
+
