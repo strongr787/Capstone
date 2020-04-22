@@ -21,8 +21,7 @@
             <Button x:Name="startRecording"  FontSize="32" Background="{ThemeResource SystemAccentColor}" Foreground="{ThemeResource SystemAccentColorLight3}" Width="150" Height="150" RelativePanel.AlignHorizontalCenterWithPanel="True" RelativePanel.AlignVerticalCenterWithPanel="True" FontFamily="Segoe MDL2 Assets" Content="&#xE1D6;" Click="Button_ClickStart"/>
             <Button x:Name="stopRecording"  FontSize="32" Background="{ThemeResource SystemAccentColor}" Foreground="{ThemeResource SystemAccentColorLight3}" Width="150" Height="150" RelativePanel.AlignHorizontalCenterWithPanel="True" RelativePanel.AlignVerticalCenterWithPanel="True" FontFamily="Segoe MDL2 Assets" Content="&#xE15B;" Click="Button_ClickStop"/>
             <Button x:Name="saveRecording"  FontSize="32" Background="{ThemeResource SystemAccentColor}" Foreground="{ThemeResource SystemAccentColorLight3}" Width="150" Height="150" RelativePanel.AlignHorizontalCenterWithPanel="True" RelativePanel.AlignVerticalCenterWithPanel="True" FontFamily="Segoe MDL2 Assets" Content="&#xE105;" Click="Button_ClickSave"/>
-            <TextBlock x:Name="lblFileName" RelativePanel.AlignHorizontalCenterWith="saveRecording" RelativePanel.Below="saveRecording">Display Name:</TextBlock>
-            <TextBox x:Name="displayName" Width="150" RelativePanel.Below="lblFileName" RelativePanel.AlignHorizontalCenterWith="lblFileName"></TextBox>
+            <TextBox x:Name="displayName" Width="150" RelativePanel.Below="saveRecording" RelativePanel.AlignLeftWith="saveRecording" Header="Display Name:"></TextBox>
             <Button x:Name="deleteRecording"  RelativePanel.AlignLeftWith="saveRecording" FontSize="32" Background="{ThemeResource SystemAccentColor}" Foreground="{ThemeResource SystemAccentColorLight3}" Width="150" Height="150" FontFamily="Segoe MDL2 Assets" Content="&#xE107;" Click="Button_ClickDelete"/>
         </RelativePanel>
         <ScrollViewer Grid.Row="1" Grid.Column="1">
