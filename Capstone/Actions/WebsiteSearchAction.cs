@@ -1,26 +1,16 @@
 ﻿using Capstone.Common;
 using Capstone.Models;
 using System;
+using System.Collections.Generic;
+using System.Net;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Capstone.Actions
 {
     public class WebsiteSearchAction : Action
     {
-
-        private string WebsiteName { get; set; }
-        private string SearchText { get; set; }
-
-        public enum SearchActionTypes
-        {
-            Google = 1,
-            Bing = 2,
-            DuckDuckGo = 3,
-            Amazon = 4,
-            Youtube = 5,
-            Walmart = 6
-        }
+        private SearchableWebsite desiredSearchableWebsite { get; set;}
+        private SearchEngine desiredSearchEngine { get; set; }
         public WebsiteSearchAction(string CommandString)
         {
             this.CommandString = CommandString;
@@ -29,145 +19,73 @@ namespace Capstone.Actions
 
     public override void PerformAction()
         {
-      
-            SearchableWebsite searchableWebsite = new SearchableWebsite();
-            //find which search phrase is wanted
-            SearchActionTypes desiredAction = this.GetActionFromCommand();
+             //get list of searchable websites from database
+            List<SearchableWebsite> allSearchableWebsites =  StoredProcedures.QueryAllSearchableWebsites();
+            //need to check if user provided a website to search
+            bool isUserProvidedWebsiteSearch = false;
+            //go through list of searchable websites. return true if user included the searchable website in search
+            //this will also set the website if there is a match
+            isUserProvidedWebsiteSearch = GetActionFromCommand(allSearchableWebsites);
             string searchParameters;
             string searchQuery;
 
-            switch (desiredAction)
+            if (isUserProvidedWebsiteSearch)
             {
-                case SearchActionTypes.Google:
-                    //load information from database
-                    searchableWebsite = LoadSearchModelFromDatabase(SearchActionTypes.Google);
-                    //find what is wanted to be searched and concatenate with + for end of url
-                    searchParameters = GetSearchParameters();
-                    //return the full url that contains the search 
-                    searchQuery = BuildSearchQuery(searchableWebsite, searchParameters);
-                    //launch browser. this will be done with the default browser
-                    LaunchSearch(searchQuery);
-                    break;
-                case SearchActionTypes.Bing:
-                    searchableWebsite = LoadSearchModelFromDatabase(SearchActionTypes.Bing);
-                    searchParameters = GetSearchParameters();
-                    searchQuery = BuildSearchQuery(searchableWebsite, searchParameters);
-                    LaunchSearch(searchQuery);
-                    break;
-                case SearchActionTypes.DuckDuckGo:
-                    searchableWebsite = LoadSearchModelFromDatabase(SearchActionTypes.DuckDuckGo);
-                    searchParameters = GetSearchParameters();
-                    searchQuery = BuildSearchQuery(searchableWebsite, searchParameters);
-                    LaunchSearch(searchQuery);
-                    break;
-                case SearchActionTypes.Amazon:
-                    searchableWebsite = LoadSearchModelFromDatabase(SearchActionTypes.Amazon);
-                    searchParameters = GetSearchParameters();
-                    searchQuery = BuildSearchQuery(searchableWebsite, searchParameters);
-                    LaunchSearch(searchQuery);
-                    break;
-                case SearchActionTypes.Youtube:
-                    searchableWebsite = LoadSearchModelFromDatabase(SearchActionTypes.Youtube);
-                    searchParameters = GetSearchParameters();
-                    searchQuery = BuildSearchQuery(searchableWebsite, searchParameters);
-                    LaunchSearch(searchQuery);
-                    break;
-                case SearchActionTypes.Walmart:
-                    searchableWebsite = LoadSearchModelFromDatabase(SearchActionTypes.Walmart);
-                    searchParameters = GetSearchParameters();
-                    searchQuery = BuildSearchQuery(searchableWebsite, searchParameters);
-                    LaunchSearch(searchQuery);
-                    break;
-
+                //find what is wanted to be searched and concatenate with + for end of url
+                searchParameters = GetSearchParameters();
+                searchQuery = BuildSearchQuery(desiredSearchableWebsite, searchParameters);
+                //launch browser. this will be done with the default browser
+                LaunchSearch(searchQuery);
+            }else
+            {
+                //sets desiredSearchEngine, which is the default selected in settings
+                GetDefaultSearchEngine();
+                searchParameters = GetSearchParameters();
+                searchQuery = BuildSearchQuery(desiredSearchEngine, searchParameters);
+                //launch browser. this will be done with the default browser
+                LaunchSearch(searchQuery);
             }
-            // TODO parse out the website to search, pull its info from the database, parse out what the user wants to search on, and search the website
         }
 
-        private SearchActionTypes GetActionFromCommand()
+        private void GetDefaultSearchEngine()
         {
-            var googleRegex = new Regex("(?i)(google)(?-i)");
-            var bingRegex = new Regex("(?i)(bing)(?-i)");
-            var duckDuckGoRegex = new Regex("(?i)(duckduckgo)(?-i)");
+            Setting preferredSearchEngineSetting = StoredProcedures.QuerySettingByName("Search Engine");
+            string preferredSearchEngineName = preferredSearchEngineSetting.GetSelectedOption().DisplayName;
+            // after this, use the name to query info from the search engine table
+            desiredSearchEngine = StoredProcedures.QuerySearchEngineByName(preferredSearchEngineName);
+        }
+        private bool GetActionFromCommand(List<SearchableWebsite> allSearchableWebsites)
+        {
             var amazonRegex = new Regex("(?i)(amazon)(?-i)");
             var youtubeRegex = new Regex("(?i)(youtube)(?-i)");
             var walmartRegex = new Regex("(?i)(walmart)(?-i)");
-            if (googleRegex.IsMatch(this.CommandString))
-            {
-                Setting setting = StoredProcedures.QuerySetting(1);
-                return SearchActionTypes.Google;
-            }
-            else if (bingRegex.IsMatch(this.CommandString))
-            {
-                return SearchActionTypes.Bing;
-            }
-            else if (duckDuckGoRegex.IsMatch(this.CommandString))
-            {
-                return SearchActionTypes.DuckDuckGo;
-            }
-            else if (amazonRegex.IsMatch(this.CommandString))
-            {
-                return SearchActionTypes.Amazon;
-            }
-            else if (youtubeRegex.IsMatch(this.CommandString))
-            {
-                return SearchActionTypes.Youtube;
-            }
-            else if (walmartRegex.IsMatch(this.CommandString))
-            {
-                return SearchActionTypes.Walmart;
-            }
-            else
-            {
-                //to do setup to get default search engine from selection
-                return SearchActionTypes.Walmart;
+ 
 
-
-            }
-        }
-
-        //loads desired search method from database
-        private SearchableWebsite LoadSearchModelFromDatabase(SearchActionTypes searchMethod)
-        {
-            int searchType = Convert.ToInt32(searchMethod);
-            SearchableWebsite searchableWebsite = StoredProcedures.QuerySearchableWebsite(searchType);
-
-            return searchableWebsite;
-
-        }
-        //concatenate each word with + for end of search query
-        private string BuildSearchParameter(string searchQuery)
-        {
-            int searchWordNumber = 1;
-            bool lastWord = false;
-            string searchPart = "";
-            string[] searchArray = searchQuery.Split(' ');
-            int numSearchWords = searchArray.Length;
-
-            foreach (string searchWord in searchArray)
-            {
-                if (numSearchWords <= searchWordNumber)
+            bool isDesiredSearchableWebsite;
+            foreach (SearchableWebsite searchableWebsite in allSearchableWebsites)
+            { 
+                if (amazonRegex.IsMatch(this.CommandString) || youtubeRegex.IsMatch(this.CommandString) || walmartRegex.IsMatch(this.CommandString))
                 {
-                    lastWord = true;
+                    desiredSearchableWebsite = searchableWebsite;
+                    isDesiredSearchableWebsite = true;
+                    return isDesiredSearchableWebsite;
                 }
-                if (lastWord)
-                {
-                    searchPart += searchWord;
-                }
-                else
-                {
-                    searchPart = searchPart + searchWord + "+";
-                }
-                searchWordNumber++;
             }
-
-            return searchPart;
+            isDesiredSearchableWebsite = false;
+            return isDesiredSearchableWebsite;
         }
         
         //put together base url, query search, and the search parameters
         private string BuildSearchQuery(SearchableWebsite websiteSearch, string toSearch)
         {
+            string searchQuery = websiteSearch.BaseURL + websiteSearch.QueryString + WebUtility.UrlEncode(toSearch);
 
-            string searchQuery = String.Format(@"{0}{1}{2}", websiteSearch.BaseURL, websiteSearch.QueryString, toSearch);
+            return searchQuery;
+        }
+
+        private string BuildSearchQuery(SearchEngine searchEngine, string toSearch)
+        {
+            string searchQuery = searchEngine.BaseURL + searchEngine.QueryString + WebUtility.UrlEncode(toSearch);
 
             return searchQuery;
         }
@@ -180,7 +98,6 @@ namespace Capstone.Actions
 
             //launch uri with search
             await Windows.System.Launcher.LaunchUriAsync(uri);
-
         }
 
         //find what is wanted to be searched
@@ -192,7 +109,6 @@ namespace Capstone.Actions
             {
                 var searchRegex = new Regex("(?i)(for)(?-i)");
                 searchParameters = searchRegex.Split(this.CommandString)[2].Trim();
-                searchParameters = BuildSearchParameter(searchParameters);
             }
             catch(Exception)
             {
