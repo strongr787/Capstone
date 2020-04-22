@@ -738,34 +738,36 @@ namespace Capstone.Common
             }
             return searchableWebsites;
 
-        /// <summary>
-        /// Pulls a random joke from the database and returns it
-        /// </summary>
-        /// <returns></returns>
-        public static Joke QueryRandomJoke()
-        {
-            Joke joke = null;
-            using (SqliteConnection connection = OpenDatabase())
+        }
+
+            /// <summary>
+            /// Pulls a random joke from the database and returns it
+            /// </summary>
+            /// <returns></returns>
+            public static Joke QueryRandomJoke()
             {
-                connection.Open();
-                using (SqliteCommand command = connection.CreateCommand())
+                Joke joke = null;
+                using (SqliteConnection connection = OpenDatabase())
                 {
-                    command.CommandText = "SELECT * FROM TJokes WHERE jokeID IN (SELECT jokeID FROM TJokes ORDER BY RANDOM() LIMIT 1)";
-                    SqliteDataReader reader = command.ExecuteReader();
-                    reader.Read();
-                    joke = Joke.FromDataRow(reader);
-                    reader.Close();
+                    connection.Open();
+                    using (SqliteCommand command = connection.CreateCommand())
+                    {
+                        command.CommandText = "SELECT * FROM TJokes WHERE jokeID IN (SELECT jokeID FROM TJokes ORDER BY RANDOM() LIMIT 1)";
+                        SqliteDataReader reader = command.ExecuteReader();
+                        reader.Read();
+                        joke = Joke.FromDataRow(reader);
+                        reader.Close();
+                    }
                 }
+                return joke;
+
             }
-            return joke;
+
+            private static string EscapeSingleTicks(string text)
+            {
+                var tickRegex = new Regex("'");
+                return tickRegex.Replace(text, "''");
+            }
 
         }
-
-        private static string EscapeSingleTicks(string text)
-        {
-            var tickRegex = new Regex("'");
-            return tickRegex.Replace(text, "''");
-        }
-
     }
-}
