@@ -100,8 +100,9 @@ namespace Capstone.Actions
 
             try
             {
-                var searchRegex = new Regex("(?i)(for)(?-i)");
-                searchParameters = searchRegex.Split(this.CommandString)[2].Trim();
+                var searchRegex = new Regex("(?i) for |search(?!= for)(?-i)");
+                var splitParams = searchRegex.Split(this.CommandString);
+                searchParameters = splitParams[splitParams.Length - 1].Trim();
                 if (isSearchableWebsite)
                 {
                     Regex removeSearchWords = new Regex($"(?i)(in|at|on)? ?{this.desiredSearchableWebsite.Name}(?-i)");
