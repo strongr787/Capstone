@@ -45,12 +45,6 @@ namespace Capstone.Common
 
         public static void CreateReminder(string Title, DateTime ReminderDateAndTime, string Description)
         {
-
-
-
-
-
-
             Title = EscapeSingleTicks(Title);
             Description = EscapeSingleTicks(Description);
             // gives the hour:minute [AP]m format
@@ -708,11 +702,7 @@ namespace Capstone.Common
             {
                 while (reader.Read())
                 {
-                    int intSearchEngineID = int.Parse(reader["searchEngineID"].ToString());
-                    searchEngine.SearchEngineID = intSearchEngineID;
-                    searchEngine.Name = reader["searchEngineName"].ToString();
-                    searchEngine.BaseURL = reader["searchEngineBaseURL"].ToString();
-                    searchEngine.QueryString = reader["searchEngineQueryString"].ToString();
+                    searchEngine = SearchEngine.FromDataRow(reader);
                 }
             }
             conn.Close();
@@ -737,7 +727,6 @@ namespace Capstone.Common
                 }
             }
             return searchableWebsites;
-
         }
 
             /// <summary>
@@ -760,7 +749,6 @@ namespace Capstone.Common
                     }
                 }
                 return joke;
-
             }
 
             private static string EscapeSingleTicks(string text)
@@ -768,6 +756,5 @@ namespace Capstone.Common
                 var tickRegex = new Regex("'");
                 return tickRegex.Replace(text, "''");
             }
-
         }
     }

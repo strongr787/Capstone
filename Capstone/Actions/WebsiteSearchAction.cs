@@ -32,7 +32,7 @@ namespace Capstone.Actions
             if (isUserProvidedWebsiteSearch)
             {
                 //find what is wanted to be searched and concatenate with + for end of url
-                searchParameters = GetSearchParameters();
+                searchParameters = GetSearchParameters(isUserProvidedWebsiteSearch);
                 searchQuery = BuildSearchQuery(desiredSearchableWebsite, searchParameters);
                 //launch browser. this will be done with the default browser
                 LaunchSearch(searchQuery);
@@ -40,7 +40,7 @@ namespace Capstone.Actions
             {
                 //sets desiredSearchEngine, which is the default selected in settings
                 GetDefaultSearchEngine();
-                searchParameters = GetSearchParameters();
+                searchParameters = GetSearchParameters(isUserProvidedWebsiteSearch);
                 searchQuery = BuildSearchQuery(desiredSearchEngine, searchParameters);
                 //launch browser. this will be done with the default browser
                 LaunchSearch(searchQuery);
@@ -56,23 +56,16 @@ namespace Capstone.Actions
         }
         private bool GetActionFromCommand(List<SearchableWebsite> allSearchableWebsites)
         {
-            var amazonRegex = new Regex("(?i)(amazon)(?-i)");
-            var youtubeRegex = new Regex("(?i)(youtube)(?-i)");
-            var walmartRegex = new Regex("(?i)(walmart)(?-i)");
- 
-
-            bool isDesiredSearchableWebsite;
             foreach (SearchableWebsite searchableWebsite in allSearchableWebsites)
-            { 
-                if (amazonRegex.IsMatch(this.CommandString) || youtubeRegex.IsMatch(this.CommandString) || walmartRegex.IsMatch(this.CommandString))
+            {
+                var websiteRegex = new Regex($"(?i){searchableWebsite.Name}(?-i)");
+                if (websiteRegex.IsMatch(this.CommandString))
                 {
-                    desiredSearchableWebsite = searchableWebsite;
-                    isDesiredSearchableWebsite = true;
-                    return isDesiredSearchableWebsite;
+                    this.desiredSearchableWebsite = searchableWebsite;
+                    return true;
                 }
             }
-            isDesiredSearchableWebsite = false;
-            return isDesiredSearchableWebsite;
+            return false;
         }
         
         //put together base url, query search, and the search parameters
@@ -101,7 +94,7 @@ namespace Capstone.Actions
         }
 
         //find what is wanted to be searched
-        private string GetSearchParameters()
+        private string GetSearchParameters( bool isSearchableWebsite)
         {
             string searchParameters = "";
 
@@ -109,6 +102,16 @@ namespace Capstone.Actions
             {
                 var searchRegex = new Regex("(?i)(for)(?-i)");
                 searchParameters = searchRegex.Split(this.CommandString)[2].Trim();
+                if (isSearchableWebsite)
+                {
+                    Regex removeSearchWords = new Regex($"(?i)(in|at|on)? ?{this.desiredSearchableWebsite.Name}(?-i)");
+                    searchParameters = removeSearchWords.Replace(searchParameters, string.Empty);
+                }
+                else
+                {
+                    Regex removeSearchWords = new Regex($"(?i)(in|at|on)? ?{this.desiredSearchEngine.Name}(?-i)");
+                    searchParameters = removeSearchWords.Replace(searchParameters, string.Empty);
+                }
             }
             catch(Exception)
             {
