@@ -25,6 +25,7 @@ namespace Capstone.Actions
             SetUpInternetSearchBranches();
             SetUpJokeBranches();
             SetUpDirectBobQuestionBranches();
+            SetUpDirectionBranches();
             SetUpMiscBranches();
             IsSetup = true;
         }
@@ -121,6 +122,13 @@ namespace Capstone.Actions
             alarmDict.Add("cancel", deleteAlarm);
             // add the alarm dict to the main one
             actionTree.Add("alarm", alarmDict);
+        }
+      
+        private static void SetUpDirectionBranches()
+        {
+            // add the keys to the main dict because it's easier for the user to speak less
+            Func<string, Action> getDirectionsFunction = (commandText) => new DirectionsAction(commandText);
+            actionTree.Add("directions", getDirectionsFunction);
         }
 
         public static void SetUpJokeBranches()

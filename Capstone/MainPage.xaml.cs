@@ -72,7 +72,7 @@ namespace Capstone
 
         private void LibrariesButton_Click(object sender, RoutedEventArgs e)
         {
-            // TODO navigate to settings screen (this.Frame.Navigate(typeof(screenName)))
+            this.Frame.Navigate(typeof(LibrariesWeUse));
         }
 
         private void CloseHandle(object sender, SystemNavigationCloseRequestedPreviewEventArgs e)

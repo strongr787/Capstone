@@ -150,6 +150,9 @@
     <Compile Include="Common\TextToSpeechEngine.cs" />
     <Compile Include="Common\UIUtils.cs" />
     <Compile Include="Common\Utils.cs" />
+    <Compile Include="LibrariesWeUse.xaml.cs">
+      <DependentUpon>LibrariesWeUse.xaml</DependentUpon>
+    </Compile>
     <Compile Include="DataPrivacyTips.xaml.cs">
       <DependentUpon>DataPrivacyTips.xaml</DependentUpon>
     </Compile>
@@ -223,6 +226,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="AlarmsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="LibrariesWeUse.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
