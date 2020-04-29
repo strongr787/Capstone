@@ -25,6 +25,8 @@ namespace Capstone.Actions
             SetUpInternetSearchBranches();
             SetUpJokeBranches();
             SetUpDirectBobQuestionBranches();
+            SetUpDirectionBranches();
+            SetUpMiscBranches();
             IsSetup = true;
         }
 
@@ -49,7 +51,6 @@ namespace Capstone.Actions
 
         private static void SetUpInternetSearchBranches()
         {
-           
             Func<string, Action> internetSearchDict = (commandText) => new WebsiteSearchAction(commandText);
 
             actionTree.Add("internet", internetSearchDict);
@@ -122,6 +123,21 @@ namespace Capstone.Actions
             actionTree.Add("alarm", alarmDict);
         }
 
+        private static void SetUpDirectionBranches()
+        {
+            // add the keys to the main dict because it's easier for the user to speak less
+            Func<string, Action> getDirectionsFunction = (commandText) => new DirectionsAction(commandText);
+            Dictionary<string, dynamic> otherPhrases = new Dictionary<string, dynamic>()
+            {
+                // for phrases like "how do I get to", and "get me to"
+                {"get", getDirectionsFunction },
+                // for phrases like "take me to"
+                {"take", getDirectionsFunction }
+            };
+            actionTree.Add("directions", getDirectionsFunction);
+            actionTree.Add("to", otherPhrases);
+        }
+
         public static void SetUpJokeBranches()
         {
             Func<string, Action> jokeAction = (commandText) => new JokeAction();
@@ -147,6 +163,16 @@ namespace Capstone.Actions
                 {"do", whatCanYouDoDict }
             };
             actionTree.Add("you", directQuestions);
+        }
+
+        private static void SetUpMiscBranches()
+        {
+            Func<string, Action> repeatAfterMeAction = (commandText) => new RepeatAfterMeAction(commandText);
+            var repeatAfterMeDict = new Dictionary<string, dynamic>()
+            {
+                {"me", repeatAfterMeAction}
+            };
+            actionTree.Add("repeat", repeatAfterMeDict);
         }
 
         /// <summary>
