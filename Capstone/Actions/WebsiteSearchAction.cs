@@ -133,7 +133,5 @@ namespace Capstone.Actions
 
             return searchParameters.Trim();
         }
-
-
     }
 }
